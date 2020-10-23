@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ~ Copyright (c) 2020.
+  ~ @author Md Ashiqul Islam
+  ~ @since 2020/10/21
+  -->
+
+<resources>
+    <color name="colorPrimary">#673AB7</color>
+    <color name="colorPrimaryDark">#512DA8</color>
+    <color name="colorAccent">#009688</color>
+
+    <color name="black_54_percent">#89000000</color>
+    <color name="green">#008000</color>
+
+</resources>

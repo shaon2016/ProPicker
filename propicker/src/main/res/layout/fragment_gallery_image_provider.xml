@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="utf-8"?><!--
+  ~ Copyright (c) 2020.
+  ~ @author Md Ashiqul Islam
+  ~ @since 2020/10/22
+  -->
+<layout>
+
+    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".pro_image_picker.ui.fragments.gallery.GalleryImageProviderFragment">
+
+        <androidx.appcompat.widget.Toolbar
+            android:id="@+id/toolbar"
+            android:background="@color/colorPrimary"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"/>
+
+        <ImageView
+            android:id="@+id/ivClose"
+            android:layout_marginEnd="16dp"
+            android:layout_marginTop="12dp"
+            android:layout_gravity="end"
+            android:src="@drawable/ic_baseline_white_close_24"
+            android:layout_width="32dp"
+            android:layout_height="32dp"/>
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:layout_marginTop="56dp"
+            android:id="@+id/rvImages"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/fabDone"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="end|bottom"
+            android:layout_margin="16dp"
+            android:src="@drawable/ic_baseline_check_24" />
+    </FrameLayout>
+</layout>

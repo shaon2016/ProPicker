@@ -1,0 +1,3 @@
+include ':propicker'
+include ':app'
+rootProject.name = "ProPickerSample"

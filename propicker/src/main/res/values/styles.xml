@@ -1,0 +1,13 @@
+<!--
+  ~ Copyright (c) 2020.
+  ~ @author Md Ashiqul Islam
+  ~ @since 2020/10/21
+  -->
+
+<resources>
+
+    <style name="Theme.UserAlertDialog.AppCompat" parent="Theme.AppCompat.Light.Dialog.Alert">
+<!--        <item name="android:windowBackground">@null</item>-->
+        <item name="android:windowNoTitle">true</item>
+    </style>
+</resources>
