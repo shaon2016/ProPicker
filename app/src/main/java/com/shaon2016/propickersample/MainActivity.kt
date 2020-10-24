@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
             ProImagePicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val imageFiles = ProImagePicker.getImages( data)
+                        val imageFiles = ProImagePicker.getImages(data)
 
                         if (imageFiles.size > 0) {
                             iv.setImageURI(imageFiles[0].contentUri)
@@ -40,17 +40,6 @@ class MainActivity : AppCompatActivity() {
                                 .load(imageFiles[0])
                                 .into(iv)
                         }
-
-
-//                        val images = ProImagePicker.getImages( data)
-//
-//                        if (images.size > 0) {
-//                            iv.setImageURI(images[0].contentUri)
-//                        }
-
-//                        Log.d("DATATAG", images[0].contentUri.toString())
-
-
                     }
                 }
         }
@@ -61,9 +50,6 @@ class MainActivity : AppCompatActivity() {
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val imageUri = ProImagePicker.getCapturedImageUri(data)
-
-                        // As file
-//                        ProImagePicker.getCapturedImageFile(intent)
 
                         iv.setImageURI(imageUri)
 
@@ -76,9 +62,6 @@ class MainActivity : AppCompatActivity() {
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val file = ProImagePicker.getCapturedImageFile(data)
-
-                        // As file
-//                        ProImagePicker.getCapturedImageFile(intent)
 
                         iv.setImageURI(Uri.fromFile(file))
 
