@@ -16,9 +16,46 @@ Step 2. Add the dependency
 
 ```
 dependencies {
-    implementation 'com.github.shaon2016:ProPicker:0.1.1'
+    implementation 'com.github.shaon2016:ProPicker:0.1.2'
 }
 
+```
+
+# To working with this library you have to do the below work.......
+ 
+Add this permissions in your androidManifest.xml file
+
+```
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+
+    <uses-feature android:name="android.hardware.camera.any" />
+
+    <uses-permission android:name="android.permission.CAMERA" />
+    
+```
+
+Add this in your build.gradle app module
+
+```
+android {
+
+    //.........
+    
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    buildFeatures {
+        dataBinding true
+    }
+
+}
 ```
 
 # Screenshot
