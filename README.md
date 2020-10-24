@@ -16,7 +16,7 @@ Step 2. Add the dependency
 
 ```
 dependencies {
-    implementation 'com.github.shaon2016:ProPicker:0.1.1'
+    implementation 'com.github.shaon2016:ProPicker:0.1.2'
 }
 
 ```
