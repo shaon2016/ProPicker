@@ -23,5 +23,5 @@ dependencies {
 
 # Screenshot
 
-![Showcase 1](https://github.com/shaon2016/ProPicker/tree/master/screenshot/image1.jpeg)
-![Showcase 2](https://github.com/shaon2016/ProPicker/tree/master/screenshot/image2.jpeg)
+
+![](ProPicker/screenshot/image1.jpeg)
