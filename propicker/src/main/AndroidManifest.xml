@@ -7,12 +7,12 @@
 
     <uses-feature android:name="android.hardware.camera.any" />
 
-    <application>
+    <application android:requestLegacyExternalStorage="true">
 
         <activity
+            android:name=".pro_image_picker.ui.ProImagePickerActivity"
             android:screenOrientation="portrait"
-            android:theme="@style/Theme.AppCompat.Light.NoActionBar"
-            android:name=".pro_image_picker.ui.ProImagePickerActivity" />
+            android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"

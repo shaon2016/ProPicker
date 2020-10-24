@@ -11,10 +11,13 @@ import android.app.Activity
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
@@ -22,6 +25,10 @@ import com.shaon2016.propicker.pro_image_picker.image_picker_util.ImageProvider
 import com.shaon2016.propicker.pro_image_picker.model.MediaStoreImage
 import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerActivity
 import com.shaon2016.propicker.util.FileUriUtils
+import com.shaon2016.propicker.util.FileUtil
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 object ProImagePicker {
@@ -56,15 +63,35 @@ object ProImagePicker {
             ?: ArrayList()
 
 
+    fun getImagesAsFile(context: Context, intent: Intent): ArrayList<File> {
+        val files = ArrayList<File>()
+
+        getImages(intent).forEach {
+            files.add(File(FileUriUtils.getRealPath(context, it.contentUri) ?: ""))
+        }
+
+        return files
+    }
+
+    /**
+     * It copy file to a directory
+     * */
 //    fun getImagesAsFile(context: Context, intent: Intent): ArrayList<File> {
 //        val files = ArrayList<File>()
 //
-//        getImages(intent).forEach {
-//            files.add(File(FileUriUtils.getRealPath(context, it.contentUri) ?: ""))
+//        (context as AppCompatActivity).lifecycleScope.launch {
+//            getImages(intent).forEach {
+//                files.add(getFile(context, it.contentUri))
+//            }
 //        }
 //
 //        return files
 //    }
+
+
+    private suspend fun getFile(context: Context, uri: Uri) = withContext(Dispatchers.IO) {
+        FileUtil.fileFromContentUri(context, uri)
+    }
 
     fun getCapturedImageFile(intent: Intent) =
         intent.getSerializableExtra(EXTRA_CAPTURE_IMAGE_FILE) as File? ?: File("")
