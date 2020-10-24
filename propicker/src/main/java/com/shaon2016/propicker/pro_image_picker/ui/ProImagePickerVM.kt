@@ -36,7 +36,7 @@ import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
 
-class ProImagePickerVM(application: Application) : AndroidViewModel(application) {
+internal class ProImagePickerVM(application: Application) : AndroidViewModel(application) {
     var selectedImages = MutableLiveData<MutableList<MediaStoreImage>>()
     var imageSelectionLength = 1
 

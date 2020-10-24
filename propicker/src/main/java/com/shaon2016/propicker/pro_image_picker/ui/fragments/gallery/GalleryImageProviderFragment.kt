@@ -9,7 +9,6 @@ package com.shaon2016.propicker.pro_image_picker.ui.fragments.gallery
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.provider.CalendarContract
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -24,7 +23,7 @@ import com.shaon2016.propicker.pro_image_picker.model.MediaStoreImage
 import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerVM
 
 
-class GalleryImageProviderFragment : Fragment() {
+internal class GalleryImageProviderFragment : Fragment() {
 
     private val vm by lazy {
         ViewModelProvider(requireActivity()).get(ProImagePickerVM::class.java)

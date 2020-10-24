@@ -30,7 +30,7 @@ import com.shaon2016.propicker.pro_image_picker.ui.fragments.gallery.GalleryImag
 /** The request code for requesting [Manifest.permission.READ_EXTERNAL_STORAGE] permission. */
 private const val PERMISSIONS_REQUEST = 0x1045
 
-class ProImagePickerActivity : AppCompatActivity() {
+internal class ProImagePickerActivity : AppCompatActivity() {
 
     private val vm: ProImagePickerVM by viewModels()
     private lateinit var provider: ImageProvider

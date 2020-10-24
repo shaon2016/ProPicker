@@ -10,7 +10,6 @@ import android.app.Dialog
 import android.content.Context
 import android.graphics.Color
 import android.graphics.drawable.ColorDrawable
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -25,7 +24,7 @@ import kotlinx.android.synthetic.main.rv_images_row.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 
-class GalleryImageProviderRvAdapter(
+internal class GalleryImageProviderRvAdapter(
     private val images: MutableList<MediaStoreImage>,
     private val vm: ProImagePickerVM
 ) : RecyclerView.Adapter<GalleryImageProviderRvAdapter.MyGalleryImageProviderVH>() {

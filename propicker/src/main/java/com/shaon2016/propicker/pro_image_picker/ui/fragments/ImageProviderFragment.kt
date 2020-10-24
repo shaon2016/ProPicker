@@ -41,7 +41,7 @@ import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
 
-class ImageProviderFragment : Fragment() {
+internal class ImageProviderFragment : Fragment() {
     private val TAG = "ImageProviderFragment"
 
     private val vm by lazy {
