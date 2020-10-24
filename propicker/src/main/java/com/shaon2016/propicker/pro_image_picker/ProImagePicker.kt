@@ -13,11 +13,9 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.LayoutInflater
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.lifecycleScope
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
@@ -27,7 +25,6 @@ import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerActivity
 import com.shaon2016.propicker.util.FileUriUtils
 import com.shaon2016.propicker.util.FileUtil
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -62,7 +59,10 @@ object ProImagePicker {
         intent.getSerializableExtra(EXTRA_SELECTED_IMAGES) as ArrayList<MediaStoreImage>?
             ?: ArrayList()
 
-
+    /**
+     * Get selected images as File
+     * */
+    @Deprecated("It shouldn't be used. As there is a restriction in Android 10 or above")
     fun getImagesAsFile(context: Context, intent: Intent): ArrayList<File> {
         val files = ArrayList<File>()
 
@@ -71,6 +71,22 @@ object ProImagePicker {
         }
 
         return files
+    }
+
+    /**
+     * Get selected images as Byte Array
+     * */
+    fun getImagesAsByteArray(context: Context, intent: Intent): ArrayList<ByteArray> {
+        val arrays = ArrayList<ByteArray>()
+
+        getImages(intent).forEach {
+            val byteArray = context.contentResolver.openInputStream(it.contentUri)?.readBytes()
+            byteArray?.let {
+                arrays.add(byteArray)
+            }
+        }
+
+        return arrays
     }
 
     /**
@@ -97,6 +113,13 @@ object ProImagePicker {
         intent.getSerializableExtra(EXTRA_CAPTURE_IMAGE_FILE) as File? ?: File("")
 
     fun getCapturedImageUri(intent: Intent) = intent.data
+
+    /**
+     * Convert the captured image uri to byte array
+     * Useful to upload image in server
+     * */
+    fun getCapturedImageAsByteArray(context: Context, intent: Intent) =
+        context.contentResolver.openInputStream(getCapturedImageUri(intent) ?: Uri.EMPTY)?.readBytes()
 
 
     class Builder(private val activity: Activity) {
