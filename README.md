@@ -117,13 +117,13 @@ Gallery
                 }
 ```
 
-Function that offers this library
+##### Function that offers this library
 
-$ cameraOnly() -> To open the CameraX only
-$ galleryOnly() -> To open the gallery view only
-$ crop() -> Only works with camera
-$ ProImagePicker.getImagesAsFile(this, intent) -> Returns all the images as File (Should not use in Android 10 or above)
-$ ProImagePicker.getImagesAsByteArray(this, intent) -> Returns all the images as ByteArray (You should always use it. Using this function you can load image in imageview using Glide and you can upload images or videos to server using Retrofit library.
-$ ProImagePicker.getCapturedImageFile(intent)
-$ ProImagePicker.getCapturedImageUri(intent)
-$ ProImagePicker.getImages(intent: Intent) -> Get all the images 
+1. cameraOnly() -> To open the CameraX only
+2. galleryOnly() -> To open the gallery view only
+3. crop() -> Only works with camera
+4. ProImagePicker.getImagesAsFile(this, intent) -> Returns all the images as File (Should not use in Android 10 or above)
+5. ProImagePicker.getImagesAsByteArray(this, intent) -> Returns all the images as ByteArray (You should always use it. Using this function you can load image in imageview using Glide and you can upload images or videos to server using Retrofit library.
+6. ProImagePicker.getCapturedImageFile(intent)
+7. ProImagePicker.getCapturedImageUri(intent)
+8. ProImagePicker.getImages(intent: Intent) -> Get all the images 
