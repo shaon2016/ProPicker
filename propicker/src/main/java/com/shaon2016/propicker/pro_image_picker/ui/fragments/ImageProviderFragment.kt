@@ -48,8 +48,7 @@ internal class ImageProviderFragment : Fragment() {
         ViewModelProvider(requireActivity()).get(ProImagePickerVM::class.java)
     }
     private val cropper by lazy { Cropper(activity as AppCompatActivity) }
-    private var cropperActivityLauncher: ActivityResultLauncher<Intent>? = null
-    private  var captureImageUri: Uri? = null
+    private var captureImageUri: Uri? = null
 
     private lateinit var binding: FragmentImageProviderBinding
 
@@ -76,10 +75,7 @@ internal class ImageProviderFragment : Fragment() {
 
         cameraExecutor = Executors.newSingleThreadExecutor()
 
-        cropperActivityLauncher =
-            registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
-                setResult(result.data?.data, result.data?.data?.toFile())
-            }
+
     }
 
     private fun takePhoto() {
@@ -152,22 +148,35 @@ internal class ImageProviderFragment : Fragment() {
 
     private fun shouldImageBeCropped(savedUri: Uri?, sourceFile: File) {
 
-        if (cropper.isCropEnabled()) {
-            val croppedFile = FileUtil.getImageOutputDirectory(requireContext())
+        when {
+            cropper.isCropEnabled() -> {
+                val croppedFile = FileUtil.getImageOutputDirectory(requireContext())
 
-            cropper.startCropUsingUCrop(sourceFile, croppedFile)
+                cropper.startCropUsingUCrop(sourceFile, croppedFile)
 
-        } else {
-            setResult(savedUri, sourceFile)
+            }
+            cropper.isToCompress() -> {
+                lifecycleScope.launch {
+                    if (savedUri != null) {
+                        val uri = cropper.compress(savedUri)
+                        // Deleting the saved image file
+                        cropper.delete(savedUri)
+                        setResult(uri, uri.toFile())
+
+                    } else setResult(savedUri, sourceFile)
+                }
+            }
+            else -> setResult(savedUri, sourceFile)
         }
+
     }
 
+    // For Ucrop Result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        lifecycleScope.launch(Dispatchers.IO) {
-            FileUtil.delete(captureImageUri?.toFile() ?: File(""))
-        }
+             captureImageUri?.let { cropper.delete(it) }
+
 
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
             val resultUri = UCrop.getOutput(data!!)
@@ -191,7 +200,6 @@ internal class ImageProviderFragment : Fragment() {
     override fun onDestroy() {
         super.onDestroy()
         cameraExecutor.shutdown()
-        cropperActivityLauncher?.unregister()
     }
 
     companion object {

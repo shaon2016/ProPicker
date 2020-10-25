@@ -7,23 +7,27 @@
 package com.shaon2016.propicker.pro_image_picker.image_picker_util
 
 import android.net.Uri
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.net.toFile
+import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.pro_image_picker.ProImagePicker
 import com.shaon2016.propicker.util.FileUtil
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.File
 
 class Cropper(private val activity: AppCompatActivity) {
     private val mCrop: Boolean
+    private val isToCompress: Boolean
 
     // Ucrop
     private val mMaxWidth: Int
     private val mMaxHeight: Int
     private val mCropAspectX: Float
     private val mCropAspectY: Float
-
 
     companion object {
         internal val CROPPED_FILE = "extras.crop_file"
@@ -35,6 +39,7 @@ class Cropper(private val activity: AppCompatActivity) {
 
         // Cropping
         mCrop = bundle.getBoolean(ProImagePicker.EXTRA_CROP, false)
+        isToCompress = bundle.getBoolean(ProImagePicker.EXTRA_IS_TO_COMPRESS, false)
 
         // Get Max Width/Height parameter from Intent
         mMaxWidth = bundle.getInt(ProImagePicker.EXTRA_MAX_WIDTH, 0)
@@ -60,6 +65,8 @@ class Cropper(private val activity: AppCompatActivity) {
      */
     fun isCropEnabled() = mCrop
 
+    fun isToCompress() = isToCompress
+
     /**
      * Start Crop
      */
@@ -80,6 +87,21 @@ class Cropper(private val activity: AppCompatActivity) {
 
         uCrop.start(activity, UCrop.REQUEST_CROP)
 
+    }
+
+    suspend fun compress(savedUri: Uri) = withContext(Dispatchers.IO) {
+        return@withContext FileUtil.compressImage(
+            activity.baseContext,
+            savedUri,
+            mMaxWidth.toFloat(),
+            mMaxHeight.toFloat()
+        )
+    }
+
+    fun delete(uri: Uri) {
+        (activity as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
+            FileUtil.delete(uri.toFile())
+        }
     }
 
 

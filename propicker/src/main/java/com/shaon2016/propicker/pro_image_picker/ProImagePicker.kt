@@ -42,6 +42,7 @@ object ProImagePicker {
     internal const val EXTRA_CROP_Y = "extra.crop_y"
     internal const val EXTRA_MAX_WIDTH = "extra.max_width"
     internal const val EXTRA_MAX_HEIGHT = "extra.max_height"
+    internal const val EXTRA_IS_TO_COMPRESS = "extra._is_to_compress"
 
     fun with(activity: Activity): Builder {
         return Builder(activity)
@@ -119,7 +120,8 @@ object ProImagePicker {
      * Useful to upload image in server
      * */
     fun getCapturedImageAsByteArray(context: Context, intent: Intent) =
-        context.contentResolver.openInputStream(getCapturedImageUri(intent) ?: Uri.EMPTY)?.readBytes()
+        context.contentResolver.openInputStream(getCapturedImageUri(intent) ?: Uri.EMPTY)
+            ?.readBytes()
 
 
     class Builder(private val activity: Activity) {
@@ -137,6 +139,9 @@ object ProImagePicker {
         private var cropX: Float = 0f
         private var cropY: Float = 0f
         private var crop: Boolean = false
+
+        // Compress
+        private var isToCompress: Boolean = false
 
 
         /*
@@ -229,12 +234,16 @@ object ProImagePicker {
         }
 
         /**
-         * Compress Image so that max image size can be below specified size
-         *
-         * @param maxSize Size in KB
-         */
-        fun compress(maxSize: Int): Builder {
-            this.maxSize = maxSize * 1024L
+         * @param maxWidth must be greater than 10
+         * @param maxHeight must be greater than 10
+         * */
+        fun compress(maxWidth: Int = 612, maxHeight: Int = 816): Builder {
+            if (maxHeight > 10 && maxWidth > 10) {
+                this.maxWidth = maxWidth
+                this.maxHeight = maxHeight
+            }
+
+            isToCompress = true
             return this
         }
 
@@ -320,12 +329,14 @@ object ProImagePicker {
                 putInt(EXTRA_MULTI_SELECTION, imageSelectionLength)
 
                 putBoolean(EXTRA_CROP, crop)
+                putBoolean(EXTRA_IS_TO_COMPRESS, isToCompress)
 
                 putLong(EXTRA_IMAGE_MAX_SIZE, maxSize)
                 putFloat(EXTRA_CROP_X, cropX)
                 putFloat(EXTRA_CROP_Y, cropY)
                 putInt(EXTRA_MAX_WIDTH, maxWidth)
                 putInt(EXTRA_MAX_HEIGHT, maxHeight)
+
             }
         }
 

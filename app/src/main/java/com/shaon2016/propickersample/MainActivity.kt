@@ -34,12 +34,6 @@ class MainActivity : AppCompatActivity() {
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
-//                        val imageFiles = ProImagePicker.getImagesAsFile(this, data)
-//                        if (imageFiles.size > 0) {
-//                            Glide.with(this)
-//                                .load(imageFiles[0])
-//                                .into(iv)
-//                        }
 
                         val byteArrays = ProImagePicker.getImagesAsByteArray(this, data)
                         if (byteArrays.size > 0) {
@@ -66,6 +60,8 @@ class MainActivity : AppCompatActivity() {
         btnShowCameraOnlyWithoutCrop.setOnClickListener {
             ProImagePicker.with(this)
                 .cameraOnly()
+                .compress()
+                .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val file = ProImagePicker.getCapturedImageFile(data)
