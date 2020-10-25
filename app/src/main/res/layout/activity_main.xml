@@ -8,12 +8,12 @@
     tools:context=".MainActivity">
 
     <TextView
-        android:id="@+id/btnShowCameraOnlyWithoutCrop"
+        android:id="@+id/btnShowCameraOnlyCompress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="16dp"
-        android:text="Show Camera without Crop"
+        android:text="Show Camera | Compress"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textSize="16sp" />
 

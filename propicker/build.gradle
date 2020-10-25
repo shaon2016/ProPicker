@@ -8,7 +8,7 @@ android {
     buildToolsVersion "30.0.2"
 
     defaultConfig {
-        minSdkVersion 21
+        minSdkVersion 19
         targetSdkVersion 30
         versionCode 1
         versionName "1.0"
@@ -50,7 +50,7 @@ dependencies {
     implementation "androidx.activity:activity-ktx:$activity_ktx_version"
 
     // Inline activity result
-    implementation 'com.github.florent37:inline-activity-result-kotlin:1.0.1'
+    implementation 'com.github.florent37:inline-activity-result-kotlin:1.0.4'
 
     implementation 'com.google.android.material:material:1.2.1'
 

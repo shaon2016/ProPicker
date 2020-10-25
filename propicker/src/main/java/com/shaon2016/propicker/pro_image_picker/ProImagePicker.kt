@@ -64,15 +64,16 @@ object ProImagePicker {
      * Get selected images as File
      * */
     @Deprecated("It shouldn't be used. As there is a restriction in Android 10 or above")
-    fun getImagesAsFile(context: Context, intent: Intent): ArrayList<File> {
-        val files = ArrayList<File>()
+    suspend fun getImagesAsFile(context: Context, intent: Intent): ArrayList<File> =
+        withContext(Dispatchers.IO) {
+            val files = ArrayList<File>()
 
-        getImages(intent).forEach {
-            files.add(File(FileUriUtils.getRealPath(context, it.contentUri) ?: ""))
+            getImages(intent).forEach {
+                files.add(File(FileUriUtils.getRealPath(context, it.contentUri) ?: ""))
+            }
+
+            return@withContext files
         }
-
-        return files
-    }
 
     /**
      * Get selected images as Byte Array

@@ -57,11 +57,10 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
-        btnShowCameraOnlyWithoutCrop.setOnClickListener {
+        btnShowCameraOnlyCompress.setOnClickListener {
             ProImagePicker.with(this)
                 .cameraOnly()
                 .compress()
-                .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val file = ProImagePicker.getCapturedImageFile(data)

@@ -99,7 +99,7 @@ class Cropper(private val activity: AppCompatActivity) {
     }
 
     fun delete(uri: Uri) {
-        (activity as AppCompatActivity).lifecycleScope.launch(Dispatchers.IO) {
+        activity.lifecycleScope.launch(Dispatchers.IO) {
             FileUtil.delete(uri.toFile())
         }
     }

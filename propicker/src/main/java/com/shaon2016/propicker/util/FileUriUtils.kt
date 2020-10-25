@@ -32,7 +32,7 @@ import java.io.OutputStream
 
 object FileUriUtils {
 
-    fun getRealPath(context: Context, uri: Uri): String? {
+    suspend fun getRealPath(context: Context, uri: Uri): String? {
         var path = getPathFromLocalUri(context, uri)
         if (path == null) {
             path = getPathFromRemoteUri(context, uri)
@@ -40,7 +40,7 @@ object FileUriUtils {
         return path
     }
 
-    private fun getPathFromLocalUri(context: Context, uri: Uri): String? {
+    private suspend fun getPathFromLocalUri(context: Context, uri: Uri): String? {
 
         val isKitKat = Build.VERSION.SDK_INT >= Build.VERSION_CODES.KITKAT
 
@@ -152,16 +152,15 @@ object FileUriUtils {
         return null
     }
 
-    private fun getPathFromRemoteUri(context: Context, uri: Uri): String? {
+    private suspend fun getPathFromRemoteUri(context: Context, uri: Uri): String? {
         // The code below is why Java now has try-with-resources and the Files utility.
         var file: File? = null
         var inputStream: InputStream? = null
         var outputStream: OutputStream? = null
         var success = false
         try {
-            val extension = getImageExtension(uri)
             inputStream = context.contentResolver.openInputStream(uri)
-            file = FileUtil.getImageFile(context.cacheDir, extension)
+            file = FileUtil.getImageOutputDirectory(context)
             if (file == null) return null
             outputStream = FileOutputStream(file)
             if (inputStream != null) {
@@ -187,39 +186,6 @@ object FileUriUtils {
         return if (success) file!!.path else null
     }
 
-    /**
-     * Get Image Extension i.e. .png, .jpg
-     *
-     * @return extension of image with dot, or default .jpg if it none.
-     */
-    fun getImageExtension(uriImage: Uri): String {
-        var extension: String? = null
-
-        try {
-            val imagePath = uriImage.path
-            if (imagePath != null && imagePath.lastIndexOf(".") != -1) {
-                extension = imagePath.substring(imagePath.lastIndexOf(".") + 1)
-            }
-        } catch (e: Exception) {
-            extension = null
-        }
-
-        if (extension == null || extension.isEmpty()) {
-            // default extension for matches the previous behavior of the plugin
-            extension = "jpg"
-        }
-
-        return ".$extension"
-    }
-
-    /**
-     * Get Image Extension i.e. .png, .jpg
-     *
-     * @return extension of image with dot, or default .jpg if it none.
-     */
-    fun getImageExtension(file: File): String {
-        return getImageExtension(Uri.fromFile(file))
-    }
 
     /**
      * @param uri The Uri to check.
