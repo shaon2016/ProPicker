@@ -1,6 +1,14 @@
 # ProPicker
 
-A simple library to select images from the gallery and camera.
+A simple library to select images from the gallery and camera. 
+
+There are many libraries out there. May be some serves your purposes but not satisfactory. This library is different from the others.
+
+Why should you use it? 
+
+* CameraX library to capture images. 
+* It also uses UCrop library to crop images. 
+* It uses best compression to compress your image without loosing image's quality.
 
 Step 1. Add the JitPack repository to your build file
 
