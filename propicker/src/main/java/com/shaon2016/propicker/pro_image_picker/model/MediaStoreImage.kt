@@ -3,23 +3,24 @@ package com.shaon2016.propicker.pro_image_picker.model
 import android.net.Uri
 import android.os.Parcel
 import android.os.Parcelable
+
 /**
  * Simple data class to hold information about an image included in the device's MediaStore.
  */
 data class MediaStoreImage(
-    val id: Long,
-    val displayName: String,
-    val dateAdded: String,
-    val contentUri: Uri
+    private val id: Long = 0,
+    var displayName: String,
+    private val dateAdded: String = "",
+    var contentUri: Uri
 
 ) : Parcelable {
 
-    var isSelected : Boolean = false
+    var isSelected: Boolean = false
 
     constructor(parcel: Parcel) : this(
         parcel.readLong(),
         parcel.readString() ?: "",
-        parcel.readString()?: "",
+        parcel.readString() ?: "",
         parcel.readParcelable(Uri::class.java.classLoader) ?: Uri.EMPTY
     ) {
         isSelected = parcel.readByte() != 0.toByte()

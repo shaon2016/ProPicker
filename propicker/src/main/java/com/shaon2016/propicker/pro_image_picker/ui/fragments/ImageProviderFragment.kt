@@ -175,7 +175,11 @@ internal class ImageProviderFragment : Fragment() {
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-             captureImageUri?.let { cropper.delete(it) }
+        captureImageUri?.let {
+            lifecycleScope.launch(Dispatchers.IO) {
+                cropper.delete(it)
+            }
+        }
 
 
         if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {

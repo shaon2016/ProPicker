@@ -7,23 +7,35 @@
 package com.shaon2016.propicker.pro_image_picker.ui.fragments.gallery
 
 import android.app.Activity
+import android.app.ProgressDialog
 import android.content.Intent
 import android.os.Bundle
 import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ProgressBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
+import androidx.core.net.toFile
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.GridLayoutManager
 import com.shaon2016.propicker.databinding.FragmentGalleryImageProviderBinding
 import com.shaon2016.propicker.pro_image_picker.ProImagePicker
+import com.shaon2016.propicker.pro_image_picker.image_picker_util.Cropper
 import com.shaon2016.propicker.pro_image_picker.model.MediaStoreImage
 import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerVM
+import com.shaon2016.propicker.util.D
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.runBlocking
+import kotlinx.coroutines.withContext
+import java.lang.Exception
 
 
 internal class GalleryImageProviderFragment : Fragment() {
+    private val cropper by lazy { Cropper(activity as AppCompatActivity) }
 
     private val vm by lazy {
         ViewModelProvider(requireActivity()).get(ProImagePickerVM::class.java)
@@ -74,19 +86,64 @@ internal class GalleryImageProviderFragment : Fragment() {
         binding.fabDone.setOnClickListener {
             if (vm.selectedImages.value != null && vm.selectedImages.value!!.size > 0) {
                 val intent = Intent()
-                intent.putParcelableArrayListExtra(
-                    ProImagePicker.EXTRA_SELECTED_IMAGES,
-                    vm.selectedImages.value!! as ArrayList
-                )
-                requireActivity().setResult(Activity.RESULT_OK, intent)
-            }
-            requireActivity().finish()
+
+                if (cropper.isToCompress()) {
+                    var images = ArrayList<MediaStoreImage>()
+
+                    val d = D.showProgressDialog(requireContext(), "Compressing........")
+
+                    lifecycleScope.launch {
+                        images = getCompressedImages(images)
+
+                        d.dismiss()
+
+                        intent.putParcelableArrayListExtra(
+                            ProImagePicker.EXTRA_SELECTED_IMAGES,
+                            images
+                        )
+                        requireActivity().setResult(Activity.RESULT_OK, intent)
+                        requireActivity().finish()
+                    }
+
+                } else {
+                    intent.putParcelableArrayListExtra(
+                        ProImagePicker.EXTRA_SELECTED_IMAGES,
+                        vm.selectedImages.value!! as ArrayList
+                    )
+                    requireActivity().setResult(Activity.RESULT_OK, intent)
+                    requireActivity().finish()
+                }
+
+
+            } else
+                requireActivity().finish()
         }
 
         binding.ivClose.setOnClickListener {
             requireActivity().finish()
         }
     }
+
+    private suspend fun getCompressedImages(images: ArrayList<MediaStoreImage>) =
+        withContext(Dispatchers.Default) {
+            val length = vm.selectedImages.value!!.size
+
+            try {
+                (0 until length).forEach { i ->
+                    val mediaStoreImage = vm.selectedImages.value!![i]
+
+                    mediaStoreImage.contentUri = cropper.compress(mediaStoreImage.contentUri)
+                    mediaStoreImage.displayName = mediaStoreImage.contentUri.toFile().name
+
+                    images.add(mediaStoreImage)
+                }
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+
+
+            return@withContext images
+        }
 
 
     companion object {

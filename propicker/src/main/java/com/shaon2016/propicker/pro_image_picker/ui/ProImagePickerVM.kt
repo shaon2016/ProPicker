@@ -30,8 +30,6 @@ import com.shaon2016.propicker.util.formattedDate
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.io.File
-import java.net.URI
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.concurrent.TimeUnit
@@ -200,6 +198,7 @@ internal class ProImagePickerVM(application: Application) : AndroidViewModel(app
             getApplication<Application>().contentResolver.unregisterContentObserver(it)
         }
     }
+
 }
 
 /**

@@ -13,24 +13,24 @@
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
-            android:background="@color/colorPrimary"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"/>
+            android:layout_height="wrap_content"
+            android:background="@color/colorPrimary" />
 
         <ImageView
             android:id="@+id/ivClose"
-            android:layout_marginEnd="16dp"
-            android:layout_marginTop="12dp"
-            android:layout_gravity="end"
-            android:src="@drawable/ic_baseline_white_close_24"
             android:layout_width="32dp"
-            android:layout_height="32dp"/>
+            android:layout_height="32dp"
+            android:layout_gravity="end"
+            android:layout_marginTop="12dp"
+            android:layout_marginEnd="16dp"
+            android:src="@drawable/ic_baseline_white_close_24" />
 
         <androidx.recyclerview.widget.RecyclerView
-            android:layout_marginTop="56dp"
             android:id="@+id/rvImages"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:layout_marginTop="56dp" />
 
         <com.google.android.material.floatingactionbutton.FloatingActionButton
             android:id="@+id/fabDone"
@@ -39,5 +39,7 @@
             android:layout_gravity="end|bottom"
             android:layout_margin="16dp"
             android:src="@drawable/ic_baseline_check_24" />
+
+
     </FrameLayout>
 </layout>

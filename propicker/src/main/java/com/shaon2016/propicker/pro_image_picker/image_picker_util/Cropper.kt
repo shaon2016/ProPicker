@@ -7,7 +7,6 @@
 package com.shaon2016.propicker.pro_image_picker.image_picker_util
 
 import android.net.Uri
-import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toFile
 import androidx.lifecycle.lifecycleScope
@@ -89,19 +88,15 @@ class Cropper(private val activity: AppCompatActivity) {
 
     }
 
-    suspend fun compress(savedUri: Uri) = withContext(Dispatchers.IO) {
-        return@withContext FileUtil.compressImage(
-            activity.baseContext,
-            savedUri,
-            mMaxWidth.toFloat(),
-            mMaxHeight.toFloat()
-        )
-    }
+    suspend fun compress(uri: Uri) = FileUtil.compressImage(
+        activity.baseContext,
+        uri,
+        mMaxWidth.toFloat(),
+        mMaxHeight.toFloat()
+    )
 
-    fun delete(uri: Uri) {
-        activity.lifecycleScope.launch(Dispatchers.IO) {
-            FileUtil.delete(uri.toFile())
-        }
+    suspend fun delete(uri: Uri) {
+        FileUtil.delete(uri.toFile())
     }
 
 

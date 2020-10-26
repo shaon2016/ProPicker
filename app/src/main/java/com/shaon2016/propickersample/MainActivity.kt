@@ -3,6 +3,7 @@ package com.shaon2016.propickersample
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.bumptech.glide.Glide
 import com.shaon2016.propicker.pro_image_picker.ProImagePicker
 import kotlinx.android.synthetic.main.activity_main.*
@@ -31,9 +32,9 @@ class MainActivity : AppCompatActivity() {
             ProImagePicker.with(this)
                 .galleryOnly()
                 .multiSelection(10)
+                .compress()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-
 
                         val byteArrays = ProImagePicker.getImagesAsByteArray(this, data)
                         if (byteArrays.size > 0) {
@@ -41,6 +42,11 @@ class MainActivity : AppCompatActivity() {
                                 .load(byteArrays[0])
                                 .into(iv)
                         }
+
+                        ProImagePicker.getImages(data).forEach {
+                           Log.d("DATATAG",  "Mainactivity received uri:  " + it.contentUri)
+                        }
+
                     }
                 }
         }
