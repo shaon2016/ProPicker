@@ -35,9 +35,18 @@ import java.util.Date
 import java.util.concurrent.TimeUnit
 
 internal class ProImagePickerVM(application: Application) : AndroidViewModel(application) {
+    /**
+     * It holds the selected image and update the toolbar title
+     * */
     var selectedImages = MutableLiveData<MutableList<MediaStoreImage>>()
+    /**
+     * How many image user can pick
+     * */
     var imageSelectionLength = 1
 
+    /**
+     * It loads all the image for gallery
+     * */
     private val _images = MutableLiveData<List<MediaStoreImage>>()
     val images: LiveData<List<MediaStoreImage>> get() = _images
 
