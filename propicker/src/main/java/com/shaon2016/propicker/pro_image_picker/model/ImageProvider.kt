@@ -4,9 +4,9 @@
  * @since 2020/10/21
  */
 
-package com.shaon2016.propicker.pro_image_picker.image_picker_util
+package com.shaon2016.propicker.pro_image_picker.model
 
-enum class ImageProvider {
+internal enum class ImageProvider {
     GALLERY,
     CAMERA,
     BOTH

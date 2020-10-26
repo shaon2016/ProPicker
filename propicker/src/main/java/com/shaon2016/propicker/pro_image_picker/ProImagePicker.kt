@@ -19,7 +19,7 @@ import androidx.fragment.app.Fragment
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
-import com.shaon2016.propicker.pro_image_picker.image_picker_util.ImageProvider
+import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
 import com.shaon2016.propicker.pro_image_picker.model.MediaStoreImage
 import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerActivity
 import com.shaon2016.propicker.util.FileUriUtils

@@ -30,7 +30,6 @@ import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.databinding.FragmentImageProviderBinding
 import com.shaon2016.propicker.pro_image_picker.ProImagePicker
-import com.shaon2016.propicker.pro_image_picker.image_picker_util.Cropper
 import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerVM
 import com.shaon2016.propicker.util.FileUtil
 import com.yalantis.ucrop.UCrop
@@ -47,7 +46,6 @@ internal class ImageProviderFragment : Fragment() {
     private val vm by lazy {
         ViewModelProvider(requireActivity()).get(ProImagePickerVM::class.java)
     }
-    private val cropper by lazy { Cropper(activity as AppCompatActivity) }
     private var captureImageUri: Uri? = null
 
     private lateinit var binding: FragmentImageProviderBinding
@@ -149,18 +147,18 @@ internal class ImageProviderFragment : Fragment() {
     private fun shouldImageBeCropped(savedUri: Uri?, sourceFile: File) {
 
         when {
-            cropper.isCropEnabled() -> {
+            vm.isCropEnabled -> {
                 val croppedFile = FileUtil.getImageOutputDirectory(requireContext())
 
-                cropper.startCropUsingUCrop(sourceFile, croppedFile)
+                startCrop(sourceFile, croppedFile)
 
             }
-            cropper.isToCompress() -> {
+            vm.isToCompress-> {
                 lifecycleScope.launch {
                     if (savedUri != null) {
-                        val uri = cropper.compress(savedUri)
+                        val uri = vm.compress(savedUri)
                         // Deleting the saved image file
-                        cropper.delete(savedUri)
+                        vm.delete(savedUri)
                         setResult(uri, uri.toFile())
 
                     } else setResult(savedUri, sourceFile)
@@ -171,13 +169,28 @@ internal class ImageProviderFragment : Fragment() {
 
     }
 
+    private fun startCrop(sourceFile: File, croppedFile: File) {
+        val uCrop = UCrop.of(Uri.fromFile(sourceFile), Uri.fromFile(croppedFile))
+
+        if (vm.mCropAspectX > 0 && vm.mCropAspectY > 0) {
+            uCrop.withAspectRatio(vm.mCropAspectX, vm.mCropAspectY)
+        }
+
+        if (vm.mMaxWidth > 0 && vm.mMaxHeight > 0) {
+            uCrop.withMaxResultSize(vm.mMaxWidth, vm.mMaxHeight)
+        }
+
+        uCrop.start(requireActivity(), UCrop.REQUEST_CROP)
+
+    }
+
     // For Ucrop Result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         captureImageUri?.let {
             lifecycleScope.launch(Dispatchers.IO) {
-                cropper.delete(it)
+                vm.delete(it)
             }
         }
 

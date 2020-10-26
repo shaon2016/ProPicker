@@ -22,7 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.pro_image_picker.ProImagePicker
-import com.shaon2016.propicker.pro_image_picker.image_picker_util.ImageProvider
+import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
 import com.shaon2016.propicker.pro_image_picker.ui.fragments.ImageProviderFragment
 import com.shaon2016.propicker.pro_image_picker.ui.fragments.gallery.GalleryImageProviderFragment
 
@@ -44,6 +44,20 @@ internal class ProImagePickerActivity : AppCompatActivity() {
         provider =
             intent?.extras?.getSerializable(ProImagePicker.EXTRA_IMAGE_PROVIDER) as ImageProvider
         vm.imageSelectionLength = intent?.extras?.getInt(ProImagePicker.EXTRA_MULTI_SELECTION) ?: 1
+
+        val bundle = intent.extras!!
+
+        // Cropping
+        vm.isCropEnabled = bundle.getBoolean(ProImagePicker.EXTRA_CROP, false)
+        vm.isToCompress = bundle.getBoolean(ProImagePicker.EXTRA_IS_TO_COMPRESS, false)
+
+        // Get Max Width/Height parameter from Intent
+        vm. mMaxWidth = bundle.getInt(ProImagePicker.EXTRA_MAX_WIDTH, 0)
+        vm.mMaxHeight = bundle.getInt(ProImagePicker.EXTRA_MAX_HEIGHT, 0)
+
+        // Get Crop Aspect Ratio parameter from Intent
+        vm. mCropAspectX = bundle.getFloat(ProImagePicker.EXTRA_CROP_X, 0f)
+        vm. mCropAspectY = bundle.getFloat(ProImagePicker.EXTRA_CROP_Y, 0f)
 
 
         loadProvider(provider)
