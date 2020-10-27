@@ -38,10 +38,6 @@ internal class ProImagePickerVM(application: Application) : AndroidViewModel(app
      * */
     var selectedImages = MutableLiveData<MutableList<MediaStoreImage>>()
 
-    /**
-     * How many image user can pick
-     * */
-    var imageSelectionLength = 1
 
     /**
      * It loads all the image for gallery
@@ -51,14 +47,7 @@ internal class ProImagePickerVM(application: Application) : AndroidViewModel(app
 
     private var contentObserver: ContentObserver? = null
 
-     var isCropEnabled = false
-    var isToCompress = false
 
-    // Ucrop
-     var mMaxWidth = 0
-    var mMaxHeight= 0
-    var mCropAspectX= 0f
-    var mCropAspectY= 0f
 
 
     /**
@@ -155,16 +144,7 @@ internal class ProImagePickerVM(application: Application) : AndroidViewModel(app
             TimeUnit.MICROSECONDS.toSeconds(formatter.parse("$day.$month.$year")?.time ?: 0)
         }
 
-    suspend fun compress(uri: Uri) = FileUtil.compressImage(
-        getApplication(),
-        uri,
-        mMaxWidth.toFloat(),
-        mMaxHeight.toFloat()
-    )
 
-    suspend fun delete(uri: Uri) {
-        FileUtil.delete(uri.toFile())
-    }
 
     /**
      * Since we register a [ContentObserver], we want to unregister this when the `ViewModel`

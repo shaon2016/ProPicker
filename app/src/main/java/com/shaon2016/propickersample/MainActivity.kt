@@ -22,7 +22,7 @@ class MainActivity : AppCompatActivity() {
                         val imageFiles = ProImagePicker.getImages(data)
 
                         if (imageFiles.size > 0) {
-                            iv.setImageURI(imageFiles[0].contentUri)
+                            iv.setImageURI(imageFiles[0].uri)
                         }
                     }
                 }
@@ -32,19 +32,14 @@ class MainActivity : AppCompatActivity() {
             ProImagePicker.with(this)
                 .galleryOnly()
                 .multiSelection(10)
-                .compress()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
-                        val byteArrays = ProImagePicker.getImagesAsByteArray(this, data)
-                        if (byteArrays.size > 0) {
+                        val images = ProImagePicker.getImages(data)
+                        if (images.size > 0) {
                             Glide.with(this)
-                                .load(byteArrays[0])
+                                .load(images[0].file)
                                 .into(iv)
-                        }
-
-                        ProImagePicker.getImages(data).forEach {
-                           Log.d("DATATAG",  "Mainactivity received uri:  " + it.contentUri)
                         }
 
                     }
@@ -56,9 +51,9 @@ class MainActivity : AppCompatActivity() {
                 .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val imageUri = ProImagePicker.getCapturedImageUri(data)
+                        val image = ProImagePicker.getImage(data)
 
-                        iv.setImageURI(imageUri)
+                        iv.setImageURI(image?.uri)
 
                     }
                 }
@@ -69,9 +64,8 @@ class MainActivity : AppCompatActivity() {
                 .compress()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val file = ProImagePicker.getCapturedImageFile(data)
 
-                        iv.setImageURI(Uri.fromFile(file))
+                        iv.setImageURI(Uri.fromFile(ProImagePicker.getImage(data)?.file))
 
                     }
                 }

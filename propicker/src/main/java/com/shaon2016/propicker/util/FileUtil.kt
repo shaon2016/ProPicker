@@ -124,7 +124,7 @@ object FileUtil {
         uri: Uri,
         maxWidth: Float,
         maxHeight: Float
-    ): Uri {
+    ): File {
         val filePath: String = FileUriUtils.getRealPath(context, uri)!!
         var scaledBitmap: Bitmap? = null
         val options = BitmapFactory.Options()
@@ -233,6 +233,6 @@ object FileUtil {
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
         }
-        return file.toUri()
+        return file
     }
 }

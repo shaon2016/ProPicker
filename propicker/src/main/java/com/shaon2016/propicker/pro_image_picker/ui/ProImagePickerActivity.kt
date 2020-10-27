@@ -13,6 +13,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
@@ -20,47 +21,31 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.pro_image_picker.ProImagePicker
+import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
-import com.shaon2016.propicker.pro_image_picker.ui.fragments.ImageProviderFragment
-import com.shaon2016.propicker.pro_image_picker.ui.fragments.gallery.GalleryImageProviderFragment
+import kotlinx.coroutines.launch
 
 
 /** The request code for requesting [Manifest.permission.READ_EXTERNAL_STORAGE] permission. */
 private const val PERMISSIONS_REQUEST = 0x1045
 
 internal class ProImagePickerActivity : AppCompatActivity() {
-
+    private val providerHelper by lazy { ProviderHelper(this) }
     private val vm: ProImagePickerVM by viewModels()
-    private lateinit var provider: ImageProvider
+    private lateinit var imageProvider: ImageProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_pro_image_picker)
 
-        title = "Images"
-
-        provider =
+        imageProvider =
             intent?.extras?.getSerializable(ProImagePicker.EXTRA_IMAGE_PROVIDER) as ImageProvider
-        vm.imageSelectionLength = intent?.extras?.getInt(ProImagePicker.EXTRA_MULTI_SELECTION) ?: 1
-
-        val bundle = intent.extras!!
-
-        // Cropping
-        vm.isCropEnabled = bundle.getBoolean(ProImagePicker.EXTRA_CROP, false)
-        vm.isToCompress = bundle.getBoolean(ProImagePicker.EXTRA_IS_TO_COMPRESS, false)
-
-        // Get Max Width/Height parameter from Intent
-        vm. mMaxWidth = bundle.getInt(ProImagePicker.EXTRA_MAX_WIDTH, 0)
-        vm.mMaxHeight = bundle.getInt(ProImagePicker.EXTRA_MAX_HEIGHT, 0)
-
-        // Get Crop Aspect Ratio parameter from Intent
-        vm. mCropAspectX = bundle.getFloat(ProImagePicker.EXTRA_CROP_X, 0f)
-        vm. mCropAspectY = bundle.getFloat(ProImagePicker.EXTRA_CROP_Y, 0f)
 
 
-        loadProvider(provider)
+        loadProvider(imageProvider)
 
 
     }
@@ -68,16 +53,10 @@ internal class ProImagePickerActivity : AppCompatActivity() {
     private fun loadProvider(provider: ImageProvider) {
         when (provider) {
             ImageProvider.GALLERY -> {
-                if (havePermission()) {
-                    replaceFragment(GalleryImageProviderFragment.newInstance())
-                } else {
-                    requestPermissions()
-                }
-
+                prepareGallery()
             }
             ImageProvider.CAMERA -> {
                 if (havePermission()) {
-
                     replaceFragment(ImageProviderFragment.newInstance())
                 } else {
                     requestPermissions()
@@ -89,6 +68,26 @@ internal class ProImagePickerActivity : AppCompatActivity() {
         }
     }
 
+    private fun prepareGallery() {
+        if (providerHelper.getImageSelectionLength() == 1) {
+            // Single choice
+            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+                if (uri == null) return@registerForActivityResult
+                lifecycleScope.launch {
+                    providerHelper.performGalleryOperationForSingleSelection(uri)
+                }
+            }.launch("image/*")
+        } else {
+            // Multiple choice
+            registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+                if (uris == null) return@registerForActivityResult
+
+                lifecycleScope.launch {
+                    providerHelper.performGalleryOperationForMultipleSelection(uris)
+                }
+            }.launch("image/*")
+        }
+    }
 
     private fun replaceFragment(fragment: Fragment) {
         supportFragmentManager.beginTransaction()
@@ -133,7 +132,7 @@ internal class ProImagePickerActivity : AppCompatActivity() {
             PERMISSIONS_REQUEST -> {
                 // If request is cancelled, the result arrays are empty.
                 if (grantResults.isNotEmpty() && havePermission()) {
-                    loadProvider(provider)
+                    loadProvider(imageProvider)
                 } else {
                     // If we weren't granted the permission, check to see if we should show
                     // rationale for the permission.
@@ -148,7 +147,7 @@ internal class ProImagePickerActivity : AppCompatActivity() {
     private val startSettingsForResult =
         registerForActivityResult(StartActivityForResult()) { result ->
             if (havePermission()) {
-                replaceFragment(GalleryImageProviderFragment.newInstance())
+                replaceFragment(ImageProviderFragment.newInstance())
             } else finish()
         }
 

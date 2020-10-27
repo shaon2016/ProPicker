@@ -19,6 +19,7 @@ import androidx.fragment.app.Fragment
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
+import com.shaon2016.propicker.pro_image_picker.model.Image
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
 import com.shaon2016.propicker.pro_image_picker.model.MediaStoreImage
 import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerActivity
@@ -35,7 +36,6 @@ object ProImagePicker {
     internal const val EXTRA_IMAGE_PROVIDER = "extra.image_provider"
     internal const val EXTRA_MULTI_SELECTION = "extra.multi_selection"
     internal const val EXTRA_SELECTED_IMAGES = "extra.selected_images"
-    internal const val EXTRA_CAPTURE_IMAGE_FILE = "extra.capture_image"
     internal const val EXTRA_IMAGE_MAX_SIZE = "extra.image_max_size"
     internal const val EXTRA_CROP = "extra.crop"
     internal const val EXTRA_CROP_X = "extra.crop_x"
@@ -56,9 +56,17 @@ object ProImagePicker {
      * Get all the selected images
      * @param intent
      * */
-    fun getImages(intent: Intent): ArrayList<MediaStoreImage> =
-        intent.getSerializableExtra(EXTRA_SELECTED_IMAGES) as ArrayList<MediaStoreImage>?
-            ?: ArrayList()
+    fun getImages(intent: Intent) =
+        intent.getParcelableArrayListExtra<Image>(EXTRA_SELECTED_IMAGES) ?: ArrayList()
+
+    /**
+     * Get all the selected images
+     * @param intent
+     * */
+    fun getImage(intent: Intent): Image? {
+        val images = getImages(intent)
+        return if (images.isNotEmpty()) images[0] else null
+    }
 
     /**
      * Get selected images as File
@@ -69,7 +77,7 @@ object ProImagePicker {
             val files = ArrayList<File>()
 
             getImages(intent).forEach {
-                files.add(File(FileUriUtils.getRealPath(context, it.contentUri) ?: ""))
+                files.add(File(FileUriUtils.getRealPath(context, it.uri) ?: ""))
             }
 
             return@withContext files
@@ -82,7 +90,7 @@ object ProImagePicker {
         val arrays = ArrayList<ByteArray>()
 
         getImages(intent).forEach {
-            val byteArray = context.contentResolver.openInputStream(it.contentUri)?.readBytes()
+            val byteArray = context.contentResolver.openInputStream(it.uri)?.readBytes()
             byteArray?.let {
                 arrays.add(byteArray)
             }
@@ -110,19 +118,6 @@ object ProImagePicker {
     private suspend fun getFile(context: Context, uri: Uri) = withContext(Dispatchers.IO) {
         FileUtil.fileFromContentUri(context, uri)
     }
-
-    fun getCapturedImageFile(intent: Intent) =
-        intent.getSerializableExtra(EXTRA_CAPTURE_IMAGE_FILE) as File? ?: File("")
-
-    fun getCapturedImageUri(intent: Intent) = intent.data
-
-    /**
-     * Convert the captured image uri to byte array
-     * Useful to upload image in server
-     * */
-    fun getCapturedImageAsByteArray(context: Context, intent: Intent) =
-        context.contentResolver.openInputStream(getCapturedImageUri(intent) ?: Uri.EMPTY)
-            ?.readBytes()
 
 
     class Builder(private val activity: Activity) {

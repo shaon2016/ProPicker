@@ -4,10 +4,8 @@
  * @since 2020/10/22
  */
 
-package com.shaon2016.propicker.pro_image_picker.ui.fragments
+package com.shaon2016.propicker.pro_image_picker.ui
 
-
-import android.app.Activity.RESULT_OK
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
@@ -15,8 +13,6 @@ import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.activity.result.ActivityResultLauncher
-import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.CameraSelector
 import androidx.camera.core.ImageCapture
@@ -24,18 +20,13 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.net.toFile
+import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
-import androidx.lifecycle.ViewModelProvider
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.databinding.FragmentImageProviderBinding
-import com.shaon2016.propicker.pro_image_picker.ProImagePicker
-import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerVM
+import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.util.FileUtil
-import com.yalantis.ucrop.UCrop
-import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
-import java.io.File
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 
@@ -43,9 +34,8 @@ import java.util.concurrent.Executors
 internal class ImageProviderFragment : Fragment() {
     private val TAG = "ImageProviderFragment"
 
-    private val vm by lazy {
-        ViewModelProvider(requireActivity()).get(ProImagePickerVM::class.java)
-    }
+    private val providerHelper by lazy { ProviderHelper(requireActivity() as AppCompatActivity) }
+
     private var captureImageUri: Uri? = null
 
     private lateinit var binding: FragmentImageProviderBinding
@@ -97,13 +87,17 @@ internal class ImageProviderFragment : Fragment() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    captureImageUri = Uri.fromFile(photoFile)
-                    val msg = "Photo capture succeeded: $captureImageUri"
-                    //Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
-                    Log.d(TAG, msg)
+                    captureImageUri = photoFile.toUri()
 
-                    shouldImageBeCropped(captureImageUri, photoFile)
+                    captureImageUri?.let {
+                        lifecycleScope.launch {
+                            providerHelper.performCameraOperation(captureImageUri!!)
 
+                            val msg = "Photo capture succeeded: $captureImageUri"
+                            //Toast.makeText(requireContext(), msg, Toast.LENGTH_SHORT).show()
+                            Log.d(TAG, msg)
+                        }
+                    }
                 }
             })
     }
@@ -116,14 +110,11 @@ internal class ImageProviderFragment : Fragment() {
             val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
 
             // Preview
-            val preview = Preview.Builder()
-                .build()
-                .also {
-                    it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
-                }
+            val preview = Preview.Builder().build().also {
+                it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+            }
 
-            imageCapture = ImageCapture.Builder()
-                .build()
+            imageCapture = ImageCapture.Builder().build()
 
             // Select back camera as a default
             val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
@@ -144,74 +135,13 @@ internal class ImageProviderFragment : Fragment() {
         }, ContextCompat.getMainExecutor(requireContext()))
     }
 
-    private fun shouldImageBeCropped(savedUri: Uri?, sourceFile: File) {
-
-        when {
-            vm.isCropEnabled -> {
-                val croppedFile = FileUtil.getImageOutputDirectory(requireContext())
-
-                startCrop(sourceFile, croppedFile)
-
-            }
-            vm.isToCompress-> {
-                lifecycleScope.launch {
-                    if (savedUri != null) {
-                        val uri = vm.compress(savedUri)
-                        // Deleting the saved image file
-                        vm.delete(savedUri)
-                        setResult(uri, uri.toFile())
-
-                    } else setResult(savedUri, sourceFile)
-                }
-            }
-            else -> setResult(savedUri, sourceFile)
-        }
-
-    }
-
-    private fun startCrop(sourceFile: File, croppedFile: File) {
-        val uCrop = UCrop.of(Uri.fromFile(sourceFile), Uri.fromFile(croppedFile))
-
-        if (vm.mCropAspectX > 0 && vm.mCropAspectY > 0) {
-            uCrop.withAspectRatio(vm.mCropAspectX, vm.mCropAspectY)
-        }
-
-        if (vm.mMaxWidth > 0 && vm.mMaxHeight > 0) {
-            uCrop.withMaxResultSize(vm.mMaxWidth, vm.mMaxHeight)
-        }
-
-        uCrop.start(requireActivity(), UCrop.REQUEST_CROP)
-
-    }
-
     // For Ucrop Result
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
-        captureImageUri?.let {
-            lifecycleScope.launch(Dispatchers.IO) {
-                vm.delete(it)
-            }
+        lifecycleScope.launch {
+            providerHelper.handleUCropResult(requestCode, resultCode, data, captureImageUri)
         }
-
-
-        if (resultCode == RESULT_OK && requestCode == UCrop.REQUEST_CROP) {
-            val resultUri = UCrop.getOutput(data!!)
-
-            setResult(resultUri, resultUri?.toFile())
-
-        } else if (resultCode == UCrop.RESULT_ERROR) {
-            val cropError = UCrop.getError(data!!)
-            setResult(null, null)
-        }
-    }
-
-    private fun setResult(imageUri: Uri?, imageFile: File?) {
-        val intent = Intent()
-        intent.data = imageUri
-        intent.putExtra(ProImagePicker.EXTRA_CAPTURE_IMAGE_FILE, imageFile)
-        requireActivity().setResult(RESULT_OK, intent)
-        requireActivity().finish()
     }
 
     override fun onDestroy() {
