@@ -15,7 +15,6 @@ import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
-import androidx.activity.viewModels
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -34,7 +33,6 @@ private const val PERMISSIONS_REQUEST = 0x1045
 
 internal class ProImagePickerActivity : AppCompatActivity() {
     private val providerHelper by lazy { ProviderHelper(this) }
-    private val vm: ProImagePickerVM by viewModels()
     private lateinit var imageProvider: ImageProvider
 
     override fun onCreate(savedInstanceState: Bundle?) {

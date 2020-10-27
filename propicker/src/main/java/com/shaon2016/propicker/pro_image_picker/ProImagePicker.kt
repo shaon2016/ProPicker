@@ -21,7 +21,6 @@ import com.shaon2016.propicker.R
 import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
 import com.shaon2016.propicker.pro_image_picker.model.Image
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
-import com.shaon2016.propicker.pro_image_picker.model.MediaStoreImage
 import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerActivity
 import com.shaon2016.propicker.util.FileUriUtils
 import com.shaon2016.propicker.util.FileUtil
@@ -30,8 +29,6 @@ import kotlinx.coroutines.withContext
 import java.io.File
 
 object ProImagePicker {
-    // Default Request Code to Pick Image
-    private const val REQUEST_CODE = 2404
     private const val EXTRA_MIME_TYPES = "extra.mime_types"
     internal const val EXTRA_IMAGE_PROVIDER = "extra.image_provider"
     internal const val EXTRA_MULTI_SELECTION = "extra.multi_selection"
@@ -337,6 +334,5 @@ object ProImagePicker {
         }
 
     }
-
 
 }

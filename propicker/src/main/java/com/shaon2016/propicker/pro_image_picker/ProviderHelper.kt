@@ -73,7 +73,6 @@ class ProviderHelper(private val activity: AppCompatActivity) {
             val name = file.name
             Image(name, uri, file)
         }
-
     }
 
     suspend fun performGalleryOperationForSingleSelection(uri: Uri) {
@@ -94,7 +93,6 @@ class ProviderHelper(private val activity: AppCompatActivity) {
     }
 
     suspend fun performCameraOperation(savedUri: Uri) {
-
         when {
             isCropEnabled -> {
                 val croppedFile = FileUtil.getImageOutputDirectory(activity.baseContext)
@@ -127,7 +125,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         uCrop.start(activity, UCrop.REQUEST_CROP)
     }
 
-    suspend fun delete(uri: Uri) {
+    private suspend fun delete(uri: Uri) {
         FileUtil.delete(uri.toFile())
     }
 

@@ -12,11 +12,8 @@ import android.graphics.*
 import android.media.ExifInterface
 import android.net.Uri
 import android.os.Environment
-import android.os.StatFs
 import android.util.Log
 import android.webkit.MimeTypeMap
-import androidx.core.net.toUri
-import com.yalantis.ucrop.util.BitmapLoadUtils.calculateInSampleSize
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -63,7 +60,7 @@ object FileUtil {
     }
 
     @Throws(IOException::class)
-     suspend fun copy(source: InputStream, target: OutputStream) {
+    suspend fun copy(source: InputStream, target: OutputStream) {
         val buf = ByteArray(8192)
         var length: Int
         while (source.read(buf).also { length = it } > 0) {
@@ -92,10 +89,16 @@ object FileUtil {
     /**
      * It creates a image file with png extension
      * */
-     fun getImageOutputDirectory(context: Context): File {
-        val mediaDir = context.getExternalFilesDirs(Environment.DIRECTORY_DCIM).firstOrNull()?.let {
-            File(it, "images").apply { mkdirs() }
-        }
+    fun getImageOutputDirectory(context: Context): File {
+
+        val mediaDir =
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
+                context.getExternalFilesDirs(Environment.DIRECTORY_DCIM).firstOrNull()?.let {
+                    File(it, "images").apply { mkdirs() }
+                }
+            } else {
+                null
+            }
         return if (mediaDir != null && mediaDir.exists())
             File(
                 mediaDir,
@@ -234,5 +237,24 @@ object FileUtil {
             e.printStackTrace()
         }
         return file
+    }
+
+    private fun calculateInSampleSize(
+        options: BitmapFactory.Options,
+        reqWidth: Int,
+        reqHeight: Int
+    ): Int {
+        // Raw height and width of image
+        val height = options.outHeight
+        val width = options.outWidth
+        var inSampleSize = 1
+        if (height > reqHeight || width > reqWidth) {
+            // Calculate the largest inSampleSize value that is a power of 2 and keeps both
+            // height and width lower or equal to the requested height and width.
+            while (height / inSampleSize > reqHeight || width / inSampleSize > reqWidth) {
+                inSampleSize *= 2
+            }
+        }
+        return inSampleSize
     }
 }

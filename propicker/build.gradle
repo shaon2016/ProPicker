@@ -46,7 +46,7 @@ dependencies {
 
     implementation 'androidx.constraintlayout:constraintlayout:2.0.2'
 
-    def activity_ktx_version = '1.2.0-beta01'
+    def activity_ktx_version = '1.1.0'
     implementation "androidx.activity:activity-ktx:$activity_ktx_version"
 
     // Inline activity result
