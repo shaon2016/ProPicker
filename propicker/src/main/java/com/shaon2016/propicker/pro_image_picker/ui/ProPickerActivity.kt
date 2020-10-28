@@ -27,7 +27,6 @@ import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
 import kotlinx.coroutines.launch
 
-
 /** The request code for requesting [Manifest.permission.READ_EXTERNAL_STORAGE] permission. */
 private const val PERMISSIONS_REQUEST = 0x1045
 
@@ -42,9 +41,7 @@ internal class ProPickerActivity : AppCompatActivity() {
         imageProvider =
             intent?.extras?.getSerializable(ProPicker.EXTRA_IMAGE_PROVIDER) as ImageProvider
 
-
         loadProvider(imageProvider)
-
 
     }
 
@@ -70,18 +67,22 @@ internal class ProPickerActivity : AppCompatActivity() {
         if (!providerHelper.getMultiSelection()) {
             // Single choice
             registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
-                if (uri == null) return@registerForActivityResult
-                lifecycleScope.launch {
-                    providerHelper.performGalleryOperationForSingleSelection(uri)
+                if (uri == null) finish()
+                uri?.let {
+                    lifecycleScope.launch {
+                        providerHelper.performGalleryOperationForSingleSelection(uri)
+                    }
                 }
+
             }.launch(providerHelper.getGalleryMimeTypes())
         } else {
             // Multiple choice
             registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
-                if (uris == null) return@registerForActivityResult
-
-                lifecycleScope.launch {
-                    providerHelper.performGalleryOperationForMultipleSelection(uris)
+                if (uris == null) finish()
+                uris?.let {
+                    lifecycleScope.launch {
+                        providerHelper.performGalleryOperationForMultipleSelection(uris)
+                    }
                 }
             }.launch(providerHelper.getGalleryMimeTypes())
         }
@@ -95,7 +96,6 @@ internal class ProPickerActivity : AppCompatActivity() {
     }
 
     // Permission Sections
-
     private fun havePermission() = (ContextCompat.checkSelfPermission(
         this, Manifest.permission.READ_EXTERNAL_STORAGE
     ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
@@ -173,8 +173,6 @@ internal class ProPickerActivity : AppCompatActivity() {
             }
             .create()
             .show()
-
-
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
