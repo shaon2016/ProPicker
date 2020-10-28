@@ -6,4 +6,4 @@ import kotlinx.android.parcel.Parcelize
 import java.io.File
 
 @Parcelize
-data class Image(val name: String, val uri: Uri, val file: File) : Parcelable
+data class Picker(val name: String, val uri: Uri, val file: File) : Parcelable

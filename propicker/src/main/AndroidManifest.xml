@@ -10,7 +10,7 @@
     <application android:requestLegacyExternalStorage="true">
 
         <activity
-            android:name=".pro_image_picker.ui.ProImagePickerActivity"
+            android:name=".pro_image_picker.ui.ProPickerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity

@@ -19,17 +19,17 @@ import androidx.fragment.app.Fragment
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
-import com.shaon2016.propicker.pro_image_picker.model.Image
+import com.shaon2016.propicker.pro_image_picker.model.Picker
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
-import com.shaon2016.propicker.pro_image_picker.ui.ProImagePickerActivity
+import com.shaon2016.propicker.pro_image_picker.ui.ProPickerActivity
 import com.shaon2016.propicker.util.FileUriUtils
 import com.shaon2016.propicker.util.FileUtil
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import java.io.File
 
-object ProImagePicker {
-    private const val EXTRA_MIME_TYPES = "extra.mime_types"
+object ProPicker {
+    internal const val EXTRA_MIME_TYPES = "extra.mime_types"
     internal const val EXTRA_IMAGE_PROVIDER = "extra.image_provider"
     internal const val EXTRA_MULTI_SELECTION = "extra.multi_selection"
     internal const val EXTRA_SELECTED_IMAGES = "extra.selected_images"
@@ -54,13 +54,13 @@ object ProImagePicker {
      * @param intent
      * */
     fun getImages(intent: Intent) =
-        intent.getParcelableArrayListExtra<Image>(EXTRA_SELECTED_IMAGES) ?: ArrayList()
+        intent.getParcelableArrayListExtra<Picker>(EXTRA_SELECTED_IMAGES) ?: ArrayList()
 
     /**
      * Get all the selected images
      * @param intent
      * */
-    fun getImage(intent: Intent): Image? {
+    fun getImage(intent: Intent): Picker? {
         val images = getImages(intent)
         return if (images.isNotEmpty()) images[0] else null
     }
@@ -124,7 +124,7 @@ object ProImagePicker {
         private var imageProvider = ImageProvider.BOTH
 
         // Mime types restrictions for gallery. by default all mime types are valid
-        private var mimeTypes: Array<String> = emptyArray()
+        private var mimeTypes: Array<String> = arrayOf("image/png", "image/jpeg", "image/jpg")
 
         /*
         * Crop Parameters
@@ -144,7 +144,7 @@ object ProImagePicker {
         private var maxHeight: Int = 0
 
         // Image selection length
-        private var imageSelectionLength = 5
+        private var isMultiSelection = false
 
         /**
          * Max File Size
@@ -175,16 +175,15 @@ object ProImagePicker {
          * Only pick one image
          * */
         fun singleSelection(): Builder {
-            imageSelectionLength = 1
+            isMultiSelection = false
             return this
         }
 
         /**
          * Pick many image. By default user can pick 5 images
-         * @param max
          * */
-        fun multiSelection(max: Int = 5): Builder {
-            imageSelectionLength = max
+        fun multiSelection(): Builder {
+            isMultiSelection = true
             return this
         }
 
@@ -248,10 +247,10 @@ object ProImagePicker {
          * by default array is empty, which indicates no additional restrictions, just images
          * @param mimeTypes
          */
-//        fun galleryMimeTypes(mimeTypes: Array<String>): Builder {
-//            this.mimeTypes = mimeTypes
-//            return this
-//        }
+        fun galleryMimeTypes(mimeTypes: Array<String>): Builder {
+            this.mimeTypes = mimeTypes
+            return this
+        }
 
 
         /**
@@ -294,7 +293,7 @@ object ProImagePicker {
          * Start ImagePickerActivity with given Argument
          */
         private fun startActivity(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)? = null) {
-            val intent = Intent(activity, ProImagePickerActivity::class.java)
+            val intent = Intent(activity, ProPickerActivity::class.java)
             intent.putExtras(getBundle())
             if (fragment != null) {
 
@@ -319,7 +318,7 @@ object ProImagePicker {
             return Bundle().apply {
                 putSerializable(EXTRA_IMAGE_PROVIDER, imageProvider)
                 putStringArray(EXTRA_MIME_TYPES, mimeTypes)
-                putInt(EXTRA_MULTI_SELECTION, imageSelectionLength)
+                putBoolean(EXTRA_MULTI_SELECTION, isMultiSelection)
 
                 putBoolean(EXTRA_CROP, crop)
                 putBoolean(EXTRA_IS_TO_COMPRESS, isToCompress)

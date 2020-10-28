@@ -22,7 +22,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
-import com.shaon2016.propicker.pro_image_picker.ProImagePicker
+import com.shaon2016.propicker.pro_image_picker.ProPicker
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
 import kotlinx.coroutines.launch
@@ -31,7 +31,7 @@ import kotlinx.coroutines.launch
 /** The request code for requesting [Manifest.permission.READ_EXTERNAL_STORAGE] permission. */
 private const val PERMISSIONS_REQUEST = 0x1045
 
-internal class ProImagePickerActivity : AppCompatActivity() {
+internal class ProPickerActivity : AppCompatActivity() {
     private val providerHelper by lazy { ProviderHelper(this) }
     private lateinit var imageProvider: ImageProvider
 
@@ -40,7 +40,7 @@ internal class ProImagePickerActivity : AppCompatActivity() {
         setContentView(R.layout.activity_pro_image_picker)
 
         imageProvider =
-            intent?.extras?.getSerializable(ProImagePicker.EXTRA_IMAGE_PROVIDER) as ImageProvider
+            intent?.extras?.getSerializable(ProPicker.EXTRA_IMAGE_PROVIDER) as ImageProvider
 
 
         loadProvider(imageProvider)
@@ -67,23 +67,23 @@ internal class ProImagePickerActivity : AppCompatActivity() {
     }
 
     private fun prepareGallery() {
-        if (providerHelper.getImageSelectionLength() == 1) {
+        if (!providerHelper.getMultiSelection()) {
             // Single choice
-            registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
+            registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
                 if (uri == null) return@registerForActivityResult
                 lifecycleScope.launch {
                     providerHelper.performGalleryOperationForSingleSelection(uri)
                 }
-            }.launch("image/*")
+            }.launch(providerHelper.getGalleryMimeTypes())
         } else {
             // Multiple choice
-            registerForActivityResult(ActivityResultContracts.GetMultipleContents()) { uris ->
+            registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
                 if (uris == null) return@registerForActivityResult
 
                 lifecycleScope.launch {
                     providerHelper.performGalleryOperationForMultipleSelection(uris)
                 }
-            }.launch("image/*")
+            }.launch(providerHelper.getGalleryMimeTypes())
         }
     }
 

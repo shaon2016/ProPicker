@@ -3,9 +3,8 @@ package com.shaon2016.propickersample
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
 import com.bumptech.glide.Glide
-import com.shaon2016.propicker.pro_image_picker.ProImagePicker
+import com.shaon2016.propicker.pro_image_picker.ProPicker
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -16,10 +15,10 @@ class MainActivity : AppCompatActivity() {
 
 
         btnChooser.setOnClickListener {
-            ProImagePicker.with(this)
+            ProPicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val imageFiles = ProImagePicker.getImages(data)
+                        val imageFiles = ProPicker.getImages(data)
 
                         if (imageFiles.size > 0) {
                             iv.setImageURI(imageFiles[0].uri)
@@ -29,13 +28,14 @@ class MainActivity : AppCompatActivity() {
         }
 
         btnGallery.setOnClickListener {
-            ProImagePicker.with(this)
+            ProPicker.with(this)
                 .galleryOnly()
-                .multiSelection(10)
+                .multiSelection()
+                .galleryMimeTypes(arrayOf("video/*"))
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
-                        val images = ProImagePicker.getImages(data)
+                        val images = ProPicker.getImages(data)
                         if (images.size > 0) {
                             Glide.with(this)
                                 .load(images[0].file)
@@ -45,13 +45,14 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
+
         btnShowCameraOnlyWithCrop.setOnClickListener {
-            ProImagePicker.with(this)
+            ProPicker.with(this)
                 .cameraOnly()
                 .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val image = ProImagePicker.getImage(data)
+                        val image = ProPicker.getImage(data)
 
                         iv.setImageURI(image?.uri)
 
@@ -59,13 +60,13 @@ class MainActivity : AppCompatActivity() {
                 }
         }
         btnShowCameraOnlyCompress.setOnClickListener {
-            ProImagePicker.with(this)
+            ProPicker.with(this)
                 .cameraOnly()
                 .compress()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
-                        iv.setImageURI(Uri.fromFile(ProImagePicker.getImage(data)?.file))
+                        iv.setImageURI(Uri.fromFile(ProPicker.getImage(data)?.file))
 
                     }
                 }
