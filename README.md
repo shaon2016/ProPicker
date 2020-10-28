@@ -59,7 +59,7 @@ android {
 # Screenshot
 
 
-![](screenshot/image1.jpeg)     ![](screenshot/image2.jpeg) 
+![](screenshot/image1.jpeg)     ![](screenshot/image2.gif) 
 
 ## Start Pro image picker activity
 
