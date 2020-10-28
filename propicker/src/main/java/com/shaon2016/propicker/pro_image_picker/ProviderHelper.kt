@@ -1,16 +1,20 @@
 package com.shaon2016.propicker.pro_image_picker
 
 import android.app.Activity
+import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.net.toFile
 import androidx.core.net.toUri
+import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.pro_image_picker.model.Picker
+import com.shaon2016.propicker.util.D
 import com.shaon2016.propicker.util.FileUriUtils
 import com.shaon2016.propicker.util.FileUtil
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -52,11 +56,13 @@ class ProviderHelper(private val activity: AppCompatActivity) {
 
     }
 
+    fun isToCompress() = isToCompress
+
     fun getGalleryMimeTypes() = mGalleryMimeTypes
 
     fun getMultiSelection() = isMultiSelection
 
-    private fun setResultAndFinish(images: ArrayList<Picker>?) {
+    fun setResultAndFinish(images: ArrayList<Picker>?) {
         val i = Intent().apply {
             putParcelableArrayListExtra(ProPicker.EXTRA_SELECTED_IMAGES, images)
         }
@@ -66,12 +72,14 @@ class ProviderHelper(private val activity: AppCompatActivity) {
 
     private suspend fun prepareImage(uri: Uri) = withContext(Dispatchers.IO) {
         return@withContext if (isToCompress) {
+
             val file = FileUtil.compressImage(
                 activity.baseContext,
                 uri,
                 mMaxWidth.toFloat(),
                 mMaxHeight.toFloat()
             )
+
             val name = file.name
             Picker(name, uri, file)
         } else {
@@ -81,21 +89,23 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         }
     }
 
-    suspend fun performGalleryOperationForSingleSelection(uri: Uri) {
+    suspend fun performGalleryOperationForSingleSelection(uri: Uri): ArrayList<Picker> {
         val image = prepareImage(uri)
         val images = ArrayList<Picker>()
         images.add(image)
-        setResultAndFinish(images)
+       // setResultAndFinish(images)
+        return images
     }
 
-    suspend fun performGalleryOperationForMultipleSelection(uris: List<Uri>) {
+    suspend fun performGalleryOperationForMultipleSelection(uris: List<Uri>): ArrayList<Picker> {
         val images = ArrayList<Picker>()
 
         uris.forEach { uri ->
             val image = prepareImage(uri)
             images.add(image)
         }
-        setResultAndFinish(images)
+        //setResultAndFinish(images)
+        return images
     }
 
     suspend fun performCameraOperation(savedUri: Uri) {

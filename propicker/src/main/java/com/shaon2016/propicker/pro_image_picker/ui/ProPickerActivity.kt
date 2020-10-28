@@ -8,6 +8,7 @@ package com.shaon2016.propicker.pro_image_picker.ui
 
 
 import android.Manifest
+import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
@@ -25,6 +26,7 @@ import com.shaon2016.propicker.R
 import com.shaon2016.propicker.pro_image_picker.ProPicker
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
+import com.shaon2016.propicker.util.D
 import kotlinx.coroutines.launch
 
 /** The request code for requesting [Manifest.permission.READ_EXTERNAL_STORAGE] permission. */
@@ -64,13 +66,20 @@ internal class ProPickerActivity : AppCompatActivity() {
     }
 
     private fun prepareGallery() {
+        val d = if (providerHelper.isToCompress())
+            D.showProgressDialog(this, "Compressing....", false)
+        else D.showProgressDialog(this, "Processing....", false)
+
         if (!providerHelper.getMultiSelection()) {
             // Single choice
             registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
                 if (uri == null) finish()
                 uri?.let {
                     lifecycleScope.launch {
-                        providerHelper.performGalleryOperationForSingleSelection(uri)
+                        d.show()
+                       val images =  providerHelper.performGalleryOperationForSingleSelection(uri)
+                        d.dismiss()
+                        providerHelper.setResultAndFinish(images)
                     }
                 }
 
@@ -81,7 +90,10 @@ internal class ProPickerActivity : AppCompatActivity() {
                 if (uris == null) finish()
                 uris?.let {
                     lifecycleScope.launch {
-                        providerHelper.performGalleryOperationForMultipleSelection(uris)
+                        d.show()
+                        val images  = providerHelper.performGalleryOperationForMultipleSelection(uris)
+                        d.dismiss()
+                        providerHelper.setResultAndFinish(images)
                     }
                 }
             }.launch(providerHelper.getGalleryMimeTypes())

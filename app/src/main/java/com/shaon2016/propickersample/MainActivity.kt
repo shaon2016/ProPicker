@@ -30,6 +30,8 @@ class MainActivity : AppCompatActivity() {
         btnGallery.setOnClickListener {
             ProPicker.with(this)
                 .galleryOnly()
+                .compressImage()
+                .multiSelection()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val list = ProPicker.getSelectedPickerDatas(data)

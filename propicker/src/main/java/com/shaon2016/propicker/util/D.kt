@@ -20,7 +20,6 @@ object D {
         val d = Dialog(context)
         d.setContentView(binding.root)
         d.setCancelable(isCancelable)
-        d.show()
 
         binding.tvMsg.text = msg
 
