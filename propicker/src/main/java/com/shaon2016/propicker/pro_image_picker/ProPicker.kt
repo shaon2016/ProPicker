@@ -14,6 +14,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
+import androidx.annotation.experimental.Experimental
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
@@ -214,7 +215,7 @@ object ProPicker {
          * @param maxWidth must be greater than 10
          * @param maxHeight must be greater than 10
          * */
-        fun compress(maxWidth: Int = 612, maxHeight: Int = 816): Builder {
+        fun compressImage(maxWidth: Int = 612, maxHeight: Int = 816): Builder {
             if (maxHeight > 10 && maxWidth > 10) {
                 this.maxWidth = maxWidth
                 this.maxHeight = maxHeight
@@ -224,12 +225,18 @@ object ProPicker {
             return this
         }
 
+        // TODO
+        private fun compressVideo() : Builder {
+
+            return this
+        }
+
 
         // TODO will implement later
         /**
          * Restrict mime types during gallery fetching, for instance if you do not want GIF images,
          * you can use arrayOf("image/png","image/jpeg","image/jpg")
-         * by default array is empty, which indicates no additional restrictions, just images
+         * by default array is arrayOf("image/png","image/jpeg","image/jpg"),
          * @param mimeTypes
          */
         fun galleryMimeTypes(mimeTypes: Array<String>): Builder {

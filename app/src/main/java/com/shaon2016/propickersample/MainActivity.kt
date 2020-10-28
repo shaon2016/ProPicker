@@ -18,10 +18,10 @@ class MainActivity : AppCompatActivity() {
             ProPicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val imageFiles = ProPicker.getSelectedPickerDatas(data)
+                        val list = ProPicker.getSelectedPickerDatas(data)
 
-                        if (imageFiles.size > 0) {
-                            iv.setImageURI(imageFiles[0].uri)
+                        if (list.size > 0) {
+                            iv.setImageURI(list[0].uri)
                         }
                     }
                 }
@@ -30,18 +30,14 @@ class MainActivity : AppCompatActivity() {
         btnGallery.setOnClickListener {
             ProPicker.with(this)
                 .galleryOnly()
-                .multiSelection()
-                .onlyImage()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-
-                        val images = ProPicker.getSelectedPickerDatas(data)
-                        if (images.size > 0) {
+                        val list = ProPicker.getSelectedPickerDatas(data)
+                        if (list.size > 0) {
                             Glide.with(this)
-                                .load(images[0].file)
+                                .load(list[0].file)
                                 .into(iv)
                         }
-
                     }
                 }
         }
@@ -52,9 +48,9 @@ class MainActivity : AppCompatActivity() {
                 .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val image = ProPicker.getPickerData(data)
+                        val picker = ProPicker.getPickerData(data)
 
-                        iv.setImageURI(image?.uri)
+                        iv.setImageURI(picker?.uri)
 
                     }
                 }
@@ -62,7 +58,7 @@ class MainActivity : AppCompatActivity() {
         btnShowCameraOnlyCompress.setOnClickListener {
             ProPicker.with(this)
                 .cameraOnly()
-                .compress()
+                .compressImage()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
