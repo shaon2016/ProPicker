@@ -8,14 +8,12 @@ package com.shaon2016.propicker.pro_image_picker.ui
 
 
 import android.Manifest
-import android.app.Dialog
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
@@ -155,8 +153,7 @@ internal class ProPickerActivity : AppCompatActivity() {
 
     }
 
-    private val startSettingsForResult =
-        registerForActivityResult(StartActivityForResult()) { result ->
+    private val startSettingsForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
             if (havePermission()) {
                 replaceFragment(ImageProviderFragment.newInstance())
             } else finish()
