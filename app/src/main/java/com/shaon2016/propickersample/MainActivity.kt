@@ -18,7 +18,7 @@ class MainActivity : AppCompatActivity() {
             ProPicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val imageFiles = ProPicker.getImages(data)
+                        val imageFiles = ProPicker.getSelectedPickerDatas(data)
 
                         if (imageFiles.size > 0) {
                             iv.setImageURI(imageFiles[0].uri)
@@ -31,11 +31,11 @@ class MainActivity : AppCompatActivity() {
             ProPicker.with(this)
                 .galleryOnly()
                 .multiSelection()
-                .galleryMimeTypes(arrayOf("video/*"))
+                .onlyImage()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
-                        val images = ProPicker.getImages(data)
+                        val images = ProPicker.getSelectedPickerDatas(data)
                         if (images.size > 0) {
                             Glide.with(this)
                                 .load(images[0].file)
@@ -52,7 +52,7 @@ class MainActivity : AppCompatActivity() {
                 .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val image = ProPicker.getImage(data)
+                        val image = ProPicker.getPickerData(data)
 
                         iv.setImageURI(image?.uri)
 
@@ -66,7 +66,7 @@ class MainActivity : AppCompatActivity() {
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
-                        iv.setImageURI(Uri.fromFile(ProPicker.getImage(data)?.file))
+                        iv.setImageURI(Uri.fromFile(ProPicker.getPickerData(data)?.file))
 
                     }
                 }

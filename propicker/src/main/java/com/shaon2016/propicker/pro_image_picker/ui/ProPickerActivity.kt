@@ -13,6 +13,7 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.provider.Settings
+import androidx.activity.result.ActivityResultLauncher
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AlertDialog
@@ -85,6 +86,7 @@ internal class ProPickerActivity : AppCompatActivity() {
                 }
             }.launch(providerHelper.getGalleryMimeTypes())
         }
+
     }
 
     private fun replaceFragment(fragment: Fragment) {

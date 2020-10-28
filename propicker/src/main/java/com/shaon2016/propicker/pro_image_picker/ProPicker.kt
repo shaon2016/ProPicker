@@ -53,40 +53,25 @@ object ProPicker {
      * Get all the selected images
      * @param intent
      * */
-    fun getImages(intent: Intent) =
+    fun getSelectedPickerDatas(intent: Intent) =
         intent.getParcelableArrayListExtra<Picker>(EXTRA_SELECTED_IMAGES) ?: ArrayList()
 
     /**
      * Get all the selected images
      * @param intent
      * */
-    fun getImage(intent: Intent): Picker? {
-        val images = getImages(intent)
+    fun getPickerData(intent: Intent): Picker? {
+        val images = getSelectedPickerDatas(intent)
         return if (images.isNotEmpty()) images[0] else null
     }
 
     /**
-     * Get selected images as File
-     * */
-    @Deprecated("It shouldn't be used. As there is a restriction in Android 10 or above")
-    suspend fun getImagesAsFile(context: Context, intent: Intent): ArrayList<File> =
-        withContext(Dispatchers.IO) {
-            val files = ArrayList<File>()
-
-            getImages(intent).forEach {
-                files.add(File(FileUriUtils.getRealPath(context, it.uri) ?: ""))
-            }
-
-            return@withContext files
-        }
-
-    /**
      * Get selected images as Byte Array
      * */
-    fun getImagesAsByteArray(context: Context, intent: Intent): ArrayList<ByteArray> {
+    fun getPickerDataAsByteArray(context: Context, intent: Intent): ArrayList<ByteArray> {
         val arrays = ArrayList<ByteArray>()
 
-        getImages(intent).forEach {
+        getSelectedPickerDatas(intent).forEach {
             val byteArray = context.contentResolver.openInputStream(it.uri)?.readBytes()
             byteArray?.let {
                 arrays.add(byteArray)
@@ -249,6 +234,22 @@ object ProPicker {
          */
         fun galleryMimeTypes(mimeTypes: Array<String>): Builder {
             this.mimeTypes = mimeTypes
+            return this
+        }
+
+        /**
+         * Select image from gallery
+         * */
+        fun onlyImage(): Builder {
+            this.mimeTypes = arrayOf("image/*")
+            return this
+        }
+
+        /**
+         * Select video from gallery
+         * */
+        fun onlyVideo(): Builder {
+            this.mimeTypes = arrayOf("video/*")
             return this
         }
 
