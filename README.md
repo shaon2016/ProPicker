@@ -66,13 +66,13 @@ android {
 The simplest way to start 
 
 ```
-            ProImagePicker.with(this)
+            ProPicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val imageFiles = ProImagePicker.getImages(data)
+                        val list = ProPicker.getSelectedPickerDatas(data)
 
-                        if (imageFiles.size > 0) {
-                            iv.setImageURI(imageFiles[0].contentUri)
+                        if (list.size > 0) {
+                            iv.setImageURI(list[0].uri)
                         }
                     }
                 }
@@ -83,14 +83,14 @@ What you can do with ImagePicker
 Camera
 
 ```
-            ProImagePicker.with(this)
+            ProPicker.with(this)
                 .cameraOnly()
                 .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val imageUri = ProImagePicker.getCapturedImageUri(data)
+                        val picker = ProPicker.getPickerData(data)
 
-                        iv.setImageURI(imageUri)
+                        iv.setImageURI(picker?.uri)
 
                     }
                 }
@@ -99,16 +99,14 @@ Camera
 Gallery
 
 ```
-            ProImagePicker.with(this)
+            ProPicker.with(this)
                 .galleryOnly()
-                .multiSelection(10)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-
-                        val imageFiles = ProImagePicker.getImagesAsFile(this, data)
-                        if (imageFiles.size > 0) {
+                        val list = ProPicker.getSelectedPickerDatas(data)
+                        if (list.size > 0) {
                             Glide.with(this)
-                                .load(imageFiles[0])
+                                .load(list[0].file)
                                 .into(iv)
                         }
                     }
@@ -117,11 +115,25 @@ Gallery
 
 ##### Function that offers this library
 
+## For Camera
+
 1. cameraOnly() -> To open the CameraX only
-2. galleryOnly() -> To open the gallery view only
 3. crop() -> Only works with camera
-4. ProImagePicker.getImagesAsFile(this, intent) -> Returns all the images as File (Should not use in Android 10 or above)
-5. ProImagePicker.getImagesAsByteArray(this, intent) -> Returns all the images as ByteArray (You should always use it. Using this function you can load image in imageview using Glide and you can upload images or videos to server using Retrofit library.
-6. ProImagePicker.getCapturedImageFile(intent)
-7. ProImagePicker.getCapturedImageUri(intent)
-8. ProImagePicker.getImages(intent: Intent) -> Get all the images 
+3. compressImage -> compresing image work for both gallery and camera
+
+
+## Gallery related function
+4. galleryOnly() -> To open the gallery view only
+5. singleSelection -> Pick single file
+6. multiSelection -> Pick multi file and get the result as ArrayList    
+7. maxResultSize -> Max Width and Height of final image
+8. compressImage -> compresing image work for both gallery and camera
+9. compressVideo -> (Under Development)
+10. onlyImage -> Select image from gallery
+11. onlyVideo -> Select video from gallery
+
+## Receiver the result
+
+12. ProPicker.getPickerDataAsByteArray(this, intent) -> Returns all the data as ByteArray 
+13. ProPicker.getSelectedPickerDatas(intent: Intent) -> Get all the data 
+14. ProPicker.getPickerData(intent: Intent) -> Get single data 
