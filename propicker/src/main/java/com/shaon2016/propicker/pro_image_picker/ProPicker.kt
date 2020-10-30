@@ -13,21 +13,18 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.view.LayoutInflater
-import androidx.annotation.experimental.Experimental
+import android.view.View
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import com.shaon2016.propicker.R
-import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
 import com.shaon2016.propicker.pro_image_picker.model.Picker
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
 import com.shaon2016.propicker.pro_image_picker.ui.ProPickerActivity
-import com.shaon2016.propicker.util.FileUriUtils
 import com.shaon2016.propicker.util.FileUtil
+import kotlinx.android.synthetic.main.dialog_image_picker_chooser.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
 
 object ProPicker {
     internal const val EXTRA_MIME_TYPES = "extra.mime_types"
@@ -274,12 +271,10 @@ object ProPicker {
         }
 
         private fun showImageProviderDialog(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)?) {
-            val v = DialogImagePickerChooserBinding.inflate(
-                LayoutInflater.from(activity), null, false
-            )
+            val v = View.inflate(activity.baseContext, R.layout.dialog_image_picker_chooser, null)
 
             val d = Dialog(activity, R.style.Theme_AppCompat_Dialog_Alert)
-            d.setContentView(v.root)
+            d.setContentView(v)
 
             v.btnCamera.setOnClickListener {
                 imageProvider = ImageProvider.CAMERA

@@ -1,20 +1,14 @@
 package com.shaon2016.propicker.pro_image_picker
 
 import android.app.Activity
-import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
-import androidx.core.net.toFile
-import androidx.core.net.toUri
-import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.pro_image_picker.model.Picker
-import com.shaon2016.propicker.util.D
 import com.shaon2016.propicker.util.FileUriUtils
 import com.shaon2016.propicker.util.FileUtil
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import java.io.File
 
@@ -93,7 +87,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         val image = prepareImage(uri)
         val images = ArrayList<Picker>()
         images.add(image)
-       // setResultAndFinish(images)
+        // setResultAndFinish(images)
         return images
     }
 
@@ -112,7 +106,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         when {
             isCropEnabled -> {
                 val croppedFile = FileUtil.getImageOutputDirectory(activity.baseContext)
-                startCrop(savedUri, croppedFile.toUri())
+                startCrop(savedUri, Uri.fromFile(croppedFile))
             }
             else -> {
                 val image = prepareImage(savedUri)
@@ -142,7 +136,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
     }
 
     private suspend fun delete(uri: Uri) {
-        FileUtil.delete(uri.toFile())
+        FileUtil.delete(File(uri.path))
     }
 
     suspend fun handleUCropResult(

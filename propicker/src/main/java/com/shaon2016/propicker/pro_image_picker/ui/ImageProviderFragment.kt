@@ -20,12 +20,12 @@ import androidx.camera.core.ImageCaptureException
 import androidx.camera.core.Preview
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.core.net.toUri
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
-import com.shaon2016.propicker.databinding.FragmentImageProviderBinding
+import com.shaon2016.propicker.R
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.util.FileUtil
+import kotlinx.android.synthetic.main.fragment_image_provider.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
@@ -38,8 +38,6 @@ internal class ImageProviderFragment : Fragment() {
 
     private var captureImageUri: Uri? = null
 
-    private lateinit var binding: FragmentImageProviderBinding
-
     // CameraX
     private var imageCapture: ImageCapture? = null
     private lateinit var cameraExecutor: ExecutorService
@@ -48,16 +46,13 @@ internal class ImageProviderFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View? {
-
-        binding = FragmentImageProviderBinding.inflate(inflater, container, false)
-
-        return binding.root
+        return inflater.inflate(R.layout.fragment_image_provider, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         startCamera()
 
-        binding.fabCamera.setOnClickListener {
+        fabCamera.setOnClickListener {
             takePhoto()
         }
 
@@ -87,7 +82,7 @@ internal class ImageProviderFragment : Fragment() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
-                    captureImageUri = photoFile.toUri()
+                    captureImageUri = Uri.fromFile(photoFile)
 
                     captureImageUri?.let {
                         lifecycleScope.launch {
@@ -111,7 +106,7 @@ internal class ImageProviderFragment : Fragment() {
 
             // Preview
             val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                it.setSurfaceProvider(viewFinder.surfaceProvider)
             }
 
             imageCapture = ImageCapture.Builder().build()

@@ -1,29 +1,25 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
+<?xml version="1.0" encoding="utf-8"?><!--
   ~ Copyright (c) 2020.
   ~ @author Md Ashiqul Islam
   ~ @since 2020/10/22
   -->
 
-<layout>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context=".pro_image_picker.ui.ImageProviderFragment">
 
-    <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        xmlns:tools="http://schemas.android.com/tools"
+    <androidx.camera.view.PreviewView
+        android:id="@+id/viewFinder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        tools:context=".pro_image_picker.ui.ImageProviderFragment">
+        android:layout_height="match_parent" />
 
-        <androidx.camera.view.PreviewView
-            android:id="@+id/viewFinder"
-            android:layout_width="match_parent"
-            android:layout_height="match_parent" />
-
-        <ImageView
-            android:layout_gravity="center|bottom"
-            android:layout_margin="16dp"
-            android:id="@+id/fabCamera"
-            android:src="@drawable/ic_baseline_photo_camera_24"
-            android:layout_width="48dp"
-            android:layout_height="48dp" />
-    </FrameLayout>
-</layout>
+    <ImageView
+        android:id="@+id/fabCamera"
+        android:layout_width="48dp"
+        android:layout_height="48dp"
+        android:layout_gravity="center|bottom"
+        android:layout_margin="16dp"
+        android:src="@drawable/ic_baseline_photo_camera_24" />
+</FrameLayout>

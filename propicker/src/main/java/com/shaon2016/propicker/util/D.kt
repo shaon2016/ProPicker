@@ -2,11 +2,9 @@ package com.shaon2016.propicker.util
 
 import android.app.Dialog
 import android.content.Context
-import android.os.Message
-import android.view.LayoutInflater
-import androidx.appcompat.app.AlertDialog
-import androidx.core.app.DialogCompat
-import com.shaon2016.propicker.databinding.DialogProgressBinding
+import android.view.View
+import com.shaon2016.propicker.R
+import kotlinx.android.synthetic.main.dialog_progress.view.*
 
 object D {
     fun showProgressDialog(
@@ -15,13 +13,13 @@ object D {
         isCancelable: Boolean = false
     ): Dialog {
 
-        val binding = DialogProgressBinding.inflate(LayoutInflater.from(context), null, false)
+        val v = View.inflate(context, R.layout.dialog_progress, null)
 
         val d = Dialog(context)
-        d.setContentView(binding.root)
+        d.setContentView(v)
         d.setCancelable(isCancelable)
 
-        binding.tvMsg.text = msg
+        v.tvMsg.text = msg
 
         return d
     }
