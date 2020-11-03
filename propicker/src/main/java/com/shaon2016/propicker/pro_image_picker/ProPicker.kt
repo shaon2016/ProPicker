@@ -39,10 +39,12 @@ object ProPicker {
     internal const val EXTRA_MAX_HEIGHT = "extra.max_height"
     internal const val EXTRA_IS_TO_COMPRESS = "extra._is_to_compress"
 
+    @JvmStatic
     fun with(activity: Activity): Builder {
         return Builder(activity)
     }
 
+    @JvmStatic
     fun with(fragment: Fragment): Builder {
         return Builder(fragment)
     }
@@ -51,6 +53,7 @@ object ProPicker {
      * Get all the selected images
      * @param intent
      * */
+    @JvmStatic
     fun getSelectedPickerDatas(intent: Intent) =
         intent.getParcelableArrayListExtra<Picker>(EXTRA_SELECTED_IMAGES) ?: ArrayList()
 
@@ -58,6 +61,7 @@ object ProPicker {
      * Get all the selected images
      * @param intent
      * */
+    @JvmStatic
     fun getPickerData(intent: Intent): Picker? {
         val images = getSelectedPickerDatas(intent)
         return if (images.isNotEmpty()) images[0] else null
@@ -66,6 +70,7 @@ object ProPicker {
     /**
      * Get selected images as Byte Array
      * */
+    @JvmStatic
     fun getPickerDataAsByteArray(context: Context, intent: Intent): ArrayList<ByteArray> {
         val arrays = ArrayList<ByteArray>()
 
@@ -261,6 +266,7 @@ object ProPicker {
         /**
          * Start Image Picker Activity
          */
+        @JvmOverloads
         fun start(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)? = null) {
             if (imageProvider == ImageProvider.BOTH) {
                 // Pick Image Provider if not specified

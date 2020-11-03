@@ -5,6 +5,7 @@
     android:orientation="vertical">
 
     <TextView
+        android:textColor="@color/black_54_percent"
         android:id="@+id/btnCamera"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,6 +18,7 @@
         android:id="@+id/btnGallery"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:textColor="@color/black_54_percent"
         android:gravity="center"
         android:padding="16dp"
         android:text="Gallery"
