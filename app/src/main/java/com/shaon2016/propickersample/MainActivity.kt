@@ -3,6 +3,7 @@ package com.shaon2016.propickersample
 import android.net.Uri
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
+import android.util.Log
 import com.bumptech.glide.Glide
 import com.shaon2016.propicker.pro_image_picker.ProPicker
 import kotlinx.android.synthetic.main.activity_main.*
@@ -18,11 +19,9 @@ class MainActivity : AppCompatActivity() {
             ProPicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-                        val list = ProPicker.getSelectedPickerDatas(data)
+                        val l = ProPicker.getPickerData(data)
 
-                        if (list.size > 0) {
-                            iv.setImageURI(list[0].uri)
-                        }
+                        iv.setImageURI(l?.uri)
                     }
                 }
         }
@@ -30,7 +29,6 @@ class MainActivity : AppCompatActivity() {
         btnGallery.setOnClickListener {
             ProPicker.with(this)
                 .galleryOnly()
-                .compressImage()
                 .multiSelection()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
@@ -40,6 +38,7 @@ class MainActivity : AppCompatActivity() {
                                 .load(list[0].file)
                                 .into(iv)
                         }
+
                     }
                 }
         }
@@ -64,7 +63,7 @@ class MainActivity : AppCompatActivity() {
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
 
-                        iv.setImageURI(Uri.fromFile(ProPicker.getPickerData(data)?.file))
+                        iv.setImageURI(ProPicker.getPickerData(data)?.uri)
 
                     }
                 }

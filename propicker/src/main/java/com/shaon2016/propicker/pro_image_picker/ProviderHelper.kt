@@ -75,7 +75,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
             )
 
             val name = file.name
-            Picker(name, uri, file)
+            Picker(name, Uri.fromFile(file), file)
         } else {
             val file = File(FileUriUtils.getRealPath(activity.baseContext, uri) ?: "")
             val name = file.name

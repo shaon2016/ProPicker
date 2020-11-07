@@ -276,7 +276,7 @@ object ProPicker {
             }
         }
 
-        private fun showImageProviderDialog(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)?) {
+        private fun showImageProviderDialog(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)? = null) {
             val v = View.inflate(activity.baseContext, R.layout.dialog_image_picker_chooser, null)
 
             val d = Dialog(activity, R.style.Theme_AppCompat_Dialog_Alert)
