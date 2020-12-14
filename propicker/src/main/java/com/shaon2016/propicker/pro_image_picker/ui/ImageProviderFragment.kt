@@ -14,12 +14,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import androidx.appcompat.app.AppCompatActivity
-import androidx.camera.core.CameraSelector
-import androidx.camera.core.ImageCapture
-import androidx.camera.core.ImageCaptureException
-import androidx.camera.core.Preview
+import androidx.camera.core.*
+import androidx.camera.core.impl.utils.Exif
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
+import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
@@ -82,6 +81,12 @@ internal class ImageProviderFragment : Fragment() {
                 }
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
+
+                    val exif = Exif.createFromFile(photoFile)
+                    val rotation = exif.rotation
+
+                    Log.d("DATATAG", rotation.toString())
+
                     captureImageUri = Uri.fromFile(photoFile)
 
                     captureImageUri?.let {

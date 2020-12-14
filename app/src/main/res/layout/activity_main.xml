@@ -48,7 +48,6 @@
         android:textSize="16sp" />
 
     <ImageView
-        android:scaleType="centerCrop"
         android:id="@+id/iv"
         android:layout_marginTop="24dp"
         android:layout_gravity="center"
