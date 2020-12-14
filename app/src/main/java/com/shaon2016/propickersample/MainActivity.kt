@@ -56,6 +56,7 @@ class MainActivity : AppCompatActivity() {
                     }
                 }
         }
+
         btnShowCameraOnlyCompress.setOnClickListener {
             ProPicker.with(this)
                 .cameraOnly()
