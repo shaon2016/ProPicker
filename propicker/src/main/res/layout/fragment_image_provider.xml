@@ -3,7 +3,6 @@
   ~ @author Md Ashiqul Islam
   ~ @since 2020/10/22
   -->
-
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
