@@ -7,19 +7,21 @@
 package com.shaon2016.propicker.pro_image_picker.ui
 
 import android.content.Intent
+import android.content.res.Configuration
 import android.net.Uri
 import android.os.Bundle
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.ImageView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
-import androidx.camera.core.impl.utils.Exif
+import androidx.camera.core.impl.PreviewConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.core.content.ContextCompat
-import androidx.exifinterface.media.ExifInterface
 import androidx.fragment.app.Fragment
+import androidx.lifecycle.Observer
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
@@ -39,7 +41,9 @@ internal class ImageProviderFragment : Fragment() {
 
     // CameraX
     private var imageCapture: ImageCapture? = null
+    private var lensFacing: Int = CameraSelector.LENS_FACING_BACK
     private lateinit var cameraExecutor: ExecutorService
+    private lateinit var cameraProvider: ProcessCameraProvider
 
     override fun onCreateView(
         inflater: LayoutInflater, container: ViewGroup?,
@@ -49,14 +53,17 @@ internal class ImageProviderFragment : Fragment() {
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        startCamera()
+        setupCamera()
 
-        fabCamera.setOnClickListener {
+        view.findViewById<ImageView>(R.id.fabCamera).setOnClickListener {
             takePhoto()
         }
+        view.findViewById<ImageView>(R.id.flipCamera).setOnClickListener {
+            flipCamera()
+        }
+
 
         cameraExecutor = Executors.newSingleThreadExecutor()
-
 
     }
 
@@ -82,11 +89,6 @@ internal class ImageProviderFragment : Fragment() {
 
                 override fun onImageSaved(output: ImageCapture.OutputFileResults) {
 
-                    val exif = Exif.createFromFile(photoFile)
-                    val rotation = exif.rotation
-
-                    Log.d("DATATAG", rotation.toString())
-
                     captureImageUri = Uri.fromFile(photoFile)
 
                     captureImageUri?.let {
@@ -102,37 +104,103 @@ internal class ImageProviderFragment : Fragment() {
             })
     }
 
-    private fun startCamera() {
+    private fun setupCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
         cameraProviderFuture.addListener(Runnable {
             // Used to bind the lifecycle of cameras to the lifecycle owner
-            val cameraProvider: ProcessCameraProvider = cameraProviderFuture.get()
+            cameraProvider = cameraProviderFuture.get()
 
-            // Preview
-            val preview = Preview.Builder().build().also {
-                it.setSurfaceProvider(viewFinder.surfaceProvider)
+            // Select lensFacing depending on the available cameras
+            lensFacing = when {
+                hasBackCamera() -> CameraSelector.LENS_FACING_BACK
+                hasFrontCamera() -> CameraSelector.LENS_FACING_FRONT
+                else -> throw IllegalStateException("Back and front camera are unavailable")
             }
 
-            imageCapture = ImageCapture.Builder().build()
+            // Enable or disable switching between cameras
+            updateCameraSwitchButton()
 
-            // Select back camera as a default
-            val cameraSelector = CameraSelector.DEFAULT_BACK_CAMERA
-
-            try {
-                // Unbind use cases before rebinding
-                cameraProvider.unbindAll()
-
-                // Bind use cases to camera
-                cameraProvider.bindToLifecycle(
-                    this, cameraSelector, preview, imageCapture
-                )
-
-            } catch (exc: Exception) {
-                Log.e(TAG, "Use case binding failed", exc)
-            }
-
+            // Build and bind the camera use cases
+            bindCameraUseCases()
         }, ContextCompat.getMainExecutor(requireContext()))
+    }
+
+    private fun bindCameraUseCases() {
+        // Preview
+        val preview = Preview.Builder().build().also {
+            it.setSurfaceProvider(viewFinder.surfaceProvider)
+        }
+
+        imageCapture = ImageCapture.Builder().build()
+
+        // Select back camera as a default
+        val cameraSelector = CameraSelector.Builder().requireLensFacing(lensFacing).build()
+
+        try {
+            // Unbind use cases before rebinding
+            cameraProvider.unbindAll()
+
+            // Bind use cases to camera
+            val cm = cameraProvider.bindToLifecycle(
+                this, cameraSelector, preview, imageCapture
+            )
+
+            initFlash(cm)
+
+        } catch (exc: Exception) {
+            Log.e(TAG, "Use case binding failed", exc)
+        }
+    }
+
+    /** Returns true if the device has an available back camera. False otherwise */
+    private fun hasBackCamera(): Boolean {
+        return cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) ?: false
+    }
+
+    /** Returns true if the device has an available front camera. False otherwise */
+    private fun hasFrontCamera(): Boolean {
+        return cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ?: false
+    }
+
+    /** Enabled or disabled a button to switch cameras depending on the available cameras */
+    private fun updateCameraSwitchButton() {
+        val switchCamerasButton = view?.findViewById<ImageView>(R.id.flipCamera)
+        try {
+            switchCamerasButton?.isEnabled = hasBackCamera() && hasFrontCamera()
+        } catch (exception: CameraInfoUnavailableException) {
+            switchCamerasButton?.isEnabled = false
+        }
+    }
+
+    private fun flipCamera() {
+        lensFacing = if (CameraSelector.LENS_FACING_FRONT == lensFacing) {
+            CameraSelector.LENS_FACING_BACK
+        } else {
+            CameraSelector.LENS_FACING_FRONT
+        }
+        // Re-bind use cases to update selected camera
+        bindCameraUseCases()
+    }
+
+    private fun initFlash(camera: Camera) {
+        val btnFlash = view?.findViewById<ImageView>(R.id.btnFlash)
+
+        if (camera.cameraInfo.hasFlashUnit()) {
+            btnFlash?.visibility = View.VISIBLE
+
+            btnFlash?.setOnClickListener {
+                camera.cameraControl.enableTorch(camera.cameraInfo.torchState.value == TorchState.OFF)
+            }
+        } else btnFlash?.visibility = View.GONE
+
+        camera.cameraInfo.torchState.observe(viewLifecycleOwner, Observer { torchState ->
+            if (torchState == TorchState.OFF) {
+                btnFlash?.setImageResource(R.drawable.ic_baseline_flash_on_24)
+            } else {
+                btnFlash?.setImageResource(R.drawable.ic_baseline_flash_off_24)
+            }
+        })
     }
 
     // For Ucrop Result

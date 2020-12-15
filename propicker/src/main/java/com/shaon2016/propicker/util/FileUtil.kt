@@ -17,6 +17,7 @@ import android.webkit.MimeTypeMap
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
+import kotlin.jvm.Throws
 
 
 /**
@@ -204,20 +205,20 @@ object FileUtil {
             )
             Log.d("EXIF", "Exif: $orientation")
             val matrix = Matrix()
-//            when (orientation) {
-//                6 -> {
-//                    matrix.postRotate(90F)
-//                    Log.d("EXIF", "Exif: $orientation")
-//                }
-//                3 -> {
-//                    matrix.postRotate(180F)
-//                    Log.d("EXIF", "Exif: $orientation")
-//                }
-//                8 -> {
-//                    matrix.postRotate(270F)
-//                    Log.d("EXIF", "Exif: $orientation")
-//                }
-//            }
+            when (orientation) {
+                6 -> {
+                    matrix.postRotate(90F)
+                    Log.d("EXIF", "Exif: $orientation")
+                }
+                3 -> {
+                    matrix.postRotate(180F)
+                    Log.d("EXIF", "Exif: $orientation")
+                }
+                8 -> {
+                    matrix.postRotate(270F)
+                    Log.d("EXIF", "Exif: $orientation")
+                }
+            }
             scaledBitmap = Bitmap.createBitmap(
                 scaledBitmap, 0, 0,
                 scaledBitmap.width, scaledBitmap.height, matrix,
