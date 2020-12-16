@@ -269,6 +269,7 @@ object ProPicker {
          * Start Image Picker Activity
          */
         @JvmOverloads
+        @JvmSuppressWildcards
         fun start(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)? = null) {
             if (imageProvider == ImageProvider.BOTH) {
                 // Pick Image Provider if not specified
