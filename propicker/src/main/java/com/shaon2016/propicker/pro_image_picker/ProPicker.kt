@@ -217,8 +217,9 @@ object ProPicker {
          * @param maxWidth must be greater than 10
          * @param maxHeight must be greater than 10
          * */
+        @JvmSuppressWildcards
         @JvmOverloads
-        fun compressImage(maxWidth: Int = 612, maxHeight: Int = 816): Builder {
+        fun compressImage( maxWidth: Int = 612, maxHeight: Int = 816): Builder {
             if (maxHeight > 10 && maxWidth > 10) {
                 this.maxWidth = maxWidth
                 this.maxHeight = maxHeight
