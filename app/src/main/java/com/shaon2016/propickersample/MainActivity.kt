@@ -1,32 +1,32 @@
 package com.shaon2016.propickersample
 
-import android.net.Uri
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.util.Log
+import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.shaon2016.propicker.pro_image_picker.ProPicker
-import kotlinx.android.synthetic.main.activity_main.*
+import com.shaon2016.propickersample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
+    private lateinit var binding: ActivityMainBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
 
-        btnChooser.setOnClickListener {
+        binding.btnChooser.setOnClickListener {
             ProPicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val l = ProPicker.getPickerData(data)
-
-                        iv.setImageURI(l?.uri)
+                        binding.iv.setImageURI(l?.uri)
                     }
                 }
         }
 
-        btnGallery.setOnClickListener {
+        binding.btnGallery.setOnClickListener {
             ProPicker.with(this)
                 .galleryOnly()
                 .compressImage()
@@ -36,39 +36,40 @@ class MainActivity : AppCompatActivity() {
                         if (list.size > 0) {
                             Glide.with(this)
                                 .load(list[0].file)
-                                .into(iv)
+                                .into(binding.iv)
                         }
 
                     }
                 }
         }
 
-        btnShowCameraOnlyWithCrop.setOnClickListener {
+
+        binding.btnShowCameraOnlyWithCrop.setOnClickListener {
             ProPicker.with(this)
                 .cameraOnly()
                 .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val picker = ProPicker.getPickerData(data)
-
-                        iv.setImageURI(picker?.uri)
+                        binding.iv.setImageURI(picker?.uri)
 
                     }
                 }
         }
 
-        btnShowCameraOnlyCompress.setOnClickListener {
+        binding.btnShowCameraOnlyCompress.setOnClickListener {
             ProPicker.with(this)
                 .cameraOnly()
                 .compressImage()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
-
-                        iv.setImageURI(ProPicker.getPickerData(data)?.uri)
+                        val picker = ProPicker.getPickerData(data)
+                        binding.iv.setImageURI(picker?.uri)
 
                     }
                 }
         }
+
 
     }
 

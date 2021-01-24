@@ -2,7 +2,12 @@ package com.shaon2016.propicker.pro_image_picker
 
 import android.app.Activity
 import android.content.Intent
+import android.graphics.Bitmap
+import android.graphics.ImageDecoder
+import android.media.MediaScannerConnection
 import android.net.Uri
+import android.os.Build
+import android.util.Log
 import androidx.appcompat.app.AppCompatActivity
 import com.shaon2016.propicker.pro_image_picker.model.Picker
 import com.shaon2016.propicker.util.FileUriUtils
@@ -10,7 +15,10 @@ import com.shaon2016.propicker.util.FileUtil
 import com.yalantis.ucrop.UCrop
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import java.io.File
+import java.io.*
+import java.util.*
+import kotlin.collections.ArrayList
+
 
 class ProviderHelper(private val activity: AppCompatActivity) {
 
@@ -67,7 +75,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
     private suspend fun prepareImage(uri: Uri) = withContext(Dispatchers.IO) {
         return@withContext if (isToCompress) {
 
-            val file = FileUtil.compressImage(
+            var file = FileUtil.compressImage(
                 activity.baseContext,
                 uri,
                 mMaxWidth.toFloat(),
@@ -75,9 +83,16 @@ class ProviderHelper(private val activity: AppCompatActivity) {
             )
 
             val name = file.name
-            Picker(name, Uri.fromFile(file), file)
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                file = File(FileUriUtils.getRealPath(activity.baseContext, uri).toString())
+            } else {
+                file = File(
+                    FileUriUtils.copyFileToInternalStorage(uri, "", activity.baseContext).toString()
+                )
+            }
+            Picker(name, uri, file)
         } else {
-            val file = File(FileUriUtils.getRealPath(activity.baseContext, uri) ?: "")
+            val file = File(FileUriUtils.getRealPath(activity.baseContext, uri).toString())
             val name = file.name
             Picker(name, uri, file)
         }
@@ -87,6 +102,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         val image = prepareImage(uri)
         val images = ArrayList<Picker>()
         images.add(image)
+
         // setResultAndFinish(images)
         return images
     }
@@ -97,6 +113,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         uris.forEach { uri ->
             val image = prepareImage(uri)
             images.add(image)
+
         }
         //setResultAndFinish(images)
         return images
@@ -108,14 +125,22 @@ class ProviderHelper(private val activity: AppCompatActivity) {
                 val croppedFile = FileUtil.getImageOutputDirectory(activity.baseContext)
                 startCrop(savedUri, Uri.fromFile(croppedFile))
             }
+            isToCompress -> {
+                val image = prepareImage(savedUri)
+                val images = ArrayList<Picker>()
+                images.add(image)
+                /*This needs to be solved
+                In case of Camera with Compress delete(savedUri) not deletes the file
+                If you'll try to delete,you wont get the uri and imageview
+                Gallery will have 2 images,but you'll get the uri of compressed one
+               */
+                setResultAndFinish(images)
+            }
+            //Camera
             else -> {
                 val image = prepareImage(savedUri)
                 val images = ArrayList<Picker>()
                 images.add(image)
-
-                // if compress is true then delete the saved image
-                if (isToCompress) delete(savedUri)
-
                 setResultAndFinish(images)
             }
         }
@@ -131,12 +156,25 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         if (mMaxWidth > 0 && mMaxHeight > 0) {
             uCrop.withMaxResultSize(mMaxWidth, mMaxHeight)
         }
-
         uCrop.start(activity, UCrop.REQUEST_CROP)
     }
 
-    private suspend fun delete(uri: Uri) {
-        FileUtil.delete(File(uri.path))
+    private fun delete(uri: Uri) {
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            val file = File(uri.path.toString())
+            file.delete()
+            MediaScannerConnection.scanFile(
+                activity.baseContext, arrayOf(file.toString()),
+                arrayOf(file.name), null
+            )
+        } else {
+            /*
+         In Android 10,its not a proper way of deleting image
+         */
+            val contentResolver = activity.contentResolver
+            contentResolver.delete(uri, null, null)
+        }
+
     }
 
     suspend fun handleUCropResult(
@@ -151,16 +189,36 @@ class ProviderHelper(private val activity: AppCompatActivity) {
             captureImageUri?.let {
                 delete(it)
             }
-            // Getting the cropped image
+            //Getting the cropped image,prepare the view
             val resultUri = UCrop.getOutput(data)
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+                //Saves to mediastore;clicked image in app package
+                var bitmap: Bitmap? = null
+                val source: ImageDecoder.Source = ImageDecoder.createSource(
+                    activity.contentResolver,
+                    resultUri!!
+                )
+                try {
+                    bitmap = ImageDecoder.decodeBitmap(source)
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+                val newuri = FileUtil.saveImageGetUri(activity.baseContext, resultUri, bitmap!!)
+                val image = prepareImage(newuri!!)
+                val images = ArrayList<Picker>()
+                images.add(image)
+                setResultAndFinish(images)
+            } else {
+                val image = prepareImage(resultUri!!)
+                val images = ArrayList<Picker>()
+                images.add(image)
+                setResultAndFinish(images)
+            }
 
-            val image = prepareImage(resultUri!!)
-            val images = ArrayList<Picker>()
-            images.add(image)
-            setResultAndFinish(images)
 
         } else if (resultCode == UCrop.RESULT_ERROR) {
             val cropError = UCrop.getError(data!!)
+            Log.e("CropError", "Cropping failed: " + cropError)
             setResultAndFinish(null)
         }
     }

@@ -6,17 +6,19 @@
 
 package com.shaon2016.propicker.util
 
-
+import android.content.ContentValues
 import android.content.Context
 import android.graphics.*
 import android.media.ExifInterface
 import android.net.Uri
-import android.os.Environment
+import android.os.Build
+import android.os.Environment.DIRECTORY_DCIM
+import android.os.Environment.getExternalStoragePublicDirectory
+import android.provider.MediaStore
 import android.webkit.MimeTypeMap
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
-import kotlin.jvm.Throws
 
 
 /**
@@ -54,12 +56,12 @@ object FileUtil {
         return tempFile
     }
 
-    suspend fun getFileExtension(context: Context, uri: Uri): String? {
+    fun getFileExtension(context: Context, uri: Uri): String? {
         val fileType: String? = context.contentResolver.getType(uri)
         return MimeTypeMap.getSingleton().getExtensionFromMimeType(fileType)
     }
 
-    suspend fun getFileExtension(fileName: String): String? {
+    fun getFileExtension(fileName: String): String? {
         return fileName.substring(fileName.lastIndexOf(".") + 1, fileName.length)
     }
 
@@ -72,14 +74,15 @@ object FileUtil {
         }
     }
 
+
     // Method to save an bitmap to a file
-    suspend fun bitmapToFile(context: Context, bitmap: Bitmap): File {
+    fun bitmapToFile(context: Context, bitmap: Bitmap): File {
         val file = getImageOutputDirectory(context)
 
         try {
             // Compress the bitmap and save in png format
             val stream: OutputStream = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 75, stream)
             stream.flush()
             stream.close()
         } catch (e: IOException) {
@@ -90,20 +93,22 @@ object FileUtil {
         return file
     }
 
+
     /**
      * It creates a image file with png extension
      * */
     fun getImageOutputDirectory(context: Context): File {
-
         val mediaDir =
-            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.KITKAT) {
-                context.getExternalFilesDirs(Environment.DIRECTORY_DCIM).firstOrNull()?.let {
+            if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+                getExternalStoragePublicDirectory(DIRECTORY_DCIM).let {
                     File(it, "images").apply { mkdirs() }
                 }
             } else {
-                null
+                context.getExternalFilesDir(null).let {
+                    File(it, "images").apply { mkdirs() }
+                }
             }
-        return if (mediaDir != null && mediaDir.exists())
+        return if (mediaDir.exists())
             File(
                 mediaDir,
                 SimpleDateFormat(
@@ -118,107 +123,156 @@ object FileUtil {
         )
     }
 
-
-    suspend fun delete(file: File) {
-        if (file.exists()) file.delete()
+    fun saveImageGetUri(context: Context, uri: Uri, inImage: Bitmap): Uri? {
+        var uri = uri
+        val bytes = ByteArrayOutputStream()
+        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            //Deprecated in 29
+            inImage.compress(Bitmap.CompressFormat.PNG, 100, bytes)
+            val path = MediaStore.Images.Media.insertImage(
+                context.contentResolver,
+                inImage,
+                uri.toString(),
+                null
+            )
+            Uri.parse(path)
+        } else {
+            val values = ContentValues()
+            values.put(
+                MediaStore.Images.Media.DISPLAY_NAME, SimpleDateFormat(
+                    FILENAME_FORMAT, Locale.US
+                ).format(System.currentTimeMillis())
+            )
+            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+            values.put(MediaStore.Images.Media.RELATIVE_PATH, DIRECTORY_DCIM)
+            values.put(MediaStore.Images.Media.IS_PENDING, 1)
+            uri = context.contentResolver.insert(
+                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+                values
+            )!!
+            var outstream: OutputStream? = null
+            try {
+                outstream = context.contentResolver.openOutputStream(uri)
+                inImage.compress(Bitmap.CompressFormat.PNG, 100, outstream)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
+            if (outstream != null) {
+                try {
+                    outstream.flush()
+                    outstream.close()
+                } catch (e: IOException) {
+                    e.printStackTrace()
+                }
+            }
+            values.clear()
+            values.put(MediaStore.Images.Media.IS_PENDING, 0)
+            context.contentResolver.update(uri, values, null, null)
+            Uri.parse(uri.toString())
+        }
     }
 
 
     /**
      * It compresses the image maintaining the ratio
      * */
-     suspend fun compressImage(
-         context: Context,
-         uri: Uri,
-         maxWidth: Float,
-         maxHeight: Float
-     ): File {
+    suspend fun compressImage(
+        context: Context,
+        uri: Uri,
+        maxWidth: Float,
+        maxHeight: Float
+    ): File {
 
-         val filePath: String = FileUriUtils.getRealPath(context, uri)!!
-         var scaledBitmap: Bitmap? = null
-         val options = BitmapFactory.Options()
+        val filePath: String
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            filePath = FileUriUtils.getRealPath(context, uri)!!
+        } else {
+            filePath = FileUriUtils.copyFileToInternalStorage(uri, "", context).toString()
+        }
+        var scaledBitmap: Bitmap? = null
+        val options = BitmapFactory.Options()
 
- //      by setting this field as true, the actual bitmap pixels are not loaded in the memory. Just the bounds are loaded. If
- //      you try the use the bitmap here, you will get null.
-         options.inJustDecodeBounds = true
-         var bmp = BitmapFactory.decodeFile(filePath, options)
-         var actualHeight = options.outHeight
-         var actualWidth = options.outWidth
+        //      by setting this field as true, the actual bitmap pixels are not loaded in the memory. Just the bounds are loaded. If
+        //      you try the use the bitmap here, you will get null.
+        options.inJustDecodeBounds = true
+        var bmp = BitmapFactory.decodeFile(filePath, options)
+        var actualHeight = options.outHeight
+        var actualWidth = options.outWidth
 
-         var imgRatio = actualWidth / actualHeight.toFloat()
-         val maxRatio = maxWidth / maxHeight
+        var imgRatio = actualWidth / actualHeight.toFloat()
+        val maxRatio = maxWidth / maxHeight
 
- //      width and height values are set maintaining the aspect ratio of the image
-         if (actualHeight > maxHeight || actualWidth > maxWidth) {
-             when {
-                 imgRatio < maxRatio -> {
-                     imgRatio = maxHeight / actualHeight
-                     actualWidth = (imgRatio * actualWidth).toInt()
-                     actualHeight = maxHeight.toInt()
-                 }
-                 imgRatio > maxRatio -> {
-                     imgRatio = maxWidth / actualWidth
-                     actualHeight = (imgRatio * actualHeight).toInt()
-                     actualWidth = maxWidth.toInt()
-                 }
-                 else -> {
-                     actualHeight = maxHeight.toInt()
-                     actualWidth = maxWidth.toInt()
-                 }
-             }
-         }
+        //      width and height values are set maintaining the aspect ratio of the image
+        if (actualHeight > maxHeight || actualWidth > maxWidth) {
+            when {
+                imgRatio < maxRatio -> {
+                    imgRatio = maxHeight / actualHeight
+                    actualWidth = (imgRatio * actualWidth).toInt()
+                    actualHeight = maxHeight.toInt()
+                }
+                imgRatio > maxRatio -> {
+                    imgRatio = maxWidth / actualWidth
+                    actualHeight = (imgRatio * actualHeight).toInt()
+                    actualWidth = maxWidth.toInt()
+                }
+                else -> {
+                    actualHeight = maxHeight.toInt()
+                    actualWidth = maxWidth.toInt()
+                }
+            }
+        }
 
- //      setting inSampleSize value allows to load a scaled down version of the original image
-         options.inSampleSize = calculateInSampleSize(options, actualWidth, actualHeight)
+        //      setting inSampleSize value allows to load a scaled down version of the original image
+        options.inSampleSize = calculateInSampleSize(options, actualWidth, actualHeight)
 
- //      inJustDecodeBounds set to false to load the actual bitmap
-         options.inJustDecodeBounds = false
+        //      inJustDecodeBounds set to false to load the actual bitmap
+        options.inJustDecodeBounds = false
 
-         options.inTempStorage = ByteArray(16 * 1024)
-         try {
- //          load the bitmap from its path
-             bmp = BitmapFactory.decodeFile(filePath, options)
-         } catch (exception: OutOfMemoryError) {
-             exception.printStackTrace()
-         }
-         try {
-             scaledBitmap = Bitmap.createBitmap(actualWidth, actualHeight, Bitmap.Config.ARGB_8888)
-         } catch (exception: OutOfMemoryError) {
-             exception.printStackTrace()
-         }
-         val ratioX = actualWidth / options.outWidth.toFloat()
-         val ratioY = actualHeight / options.outHeight.toFloat()
-         val middleX = actualWidth / 2.0f
-         val middleY = actualHeight / 2.0f
-         val scaleMatrix = Matrix()
-         scaleMatrix.setScale(ratioX, ratioY, middleX, middleY)
-         val canvas = Canvas(scaledBitmap!!)
-         canvas.setMatrix(scaleMatrix)
-         canvas.drawBitmap(
-             bmp,
-             middleX - bmp.width / 2,
-             middleY - bmp.height / 2,
-             Paint(Paint.FILTER_BITMAP_FLAG)
-         )
+        options.inTempStorage = ByteArray(16 * 1024)
+        try {
+            //          load the bitmap from its path
+            bmp = BitmapFactory.decodeFile(filePath, options)
+        } catch (exception: OutOfMemoryError) {
+            exception.printStackTrace()
+        }
+        try {
+            scaledBitmap = Bitmap.createBitmap(actualWidth, actualHeight, Bitmap.Config.ARGB_8888)
+        } catch (exception: OutOfMemoryError) {
+            exception.printStackTrace()
+        }
+        val ratioX = actualWidth / options.outWidth.toFloat()
+        val ratioY = actualHeight / options.outHeight.toFloat()
+        val middleX = actualWidth / 2.0f
+        val middleY = actualHeight / 2.0f
+        val scaleMatrix = Matrix()
+        scaleMatrix.setScale(ratioX, ratioY, middleX, middleY)
+        val canvas = Canvas(scaledBitmap!!)
+        canvas.setMatrix(scaleMatrix)
+        canvas.drawBitmap(
+            bmp,
+            middleX - bmp.width / 2,
+            middleY - bmp.height / 2,
+            Paint(Paint.FILTER_BITMAP_FLAG)
+        )
 
- //      check the rotation of the image and display it properly
-         try {
-             scaledBitmap = checkRotation(filePath, scaledBitmap, context)
-         } catch (e: IOException) {
-             e.printStackTrace()
-         }
-         var out: FileOutputStream? = null
-         val file = getImageOutputDirectory(context)
-         try {
-             out = FileOutputStream(file)
+        //      check the rotation of the image and display it properly
+        try {
+            scaledBitmap = checkRotation(filePath, scaledBitmap, context)
+        } catch (e: IOException) {
+            e.printStackTrace()
+        }
+        val save: File?
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            save = bitmapToFile(context, scaledBitmap!!)
+            return save
+        } else {
+            //Save compressed file to mediastore
+            save = File(saveImageGetUri(context, Uri.parse(filePath), scaledBitmap!!).toString())
+            return File(save.path.toString())
+        }
 
- //          write the compressed bitmap at the destination specified by filename.
-             scaledBitmap!!.compress(Bitmap.CompressFormat.PNG, 75, out)
-         } catch (e: FileNotFoundException) {
-             e.printStackTrace()
-         }
-         return file
-     }
+    }
+
 
     /*After getting image check the orientation of the image*/
     @Throws(IOException::class)

@@ -11,8 +11,10 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
+import androidx.activity.ComponentActivity
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
@@ -21,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
+import com.shaon2016.propicker.databinding.ActivityProImagePickerBinding
 import com.shaon2016.propicker.pro_image_picker.ProPicker
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
@@ -33,10 +36,13 @@ private const val PERMISSIONS_REQUEST = 0x1045
 internal class ProPickerActivity : AppCompatActivity() {
     private val providerHelper by lazy { ProviderHelper(this) }
     private lateinit var imageProvider: ImageProvider
+    private lateinit var binding: ActivityProImagePickerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_pro_image_picker)
+        binding = ActivityProImagePickerBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         imageProvider =
             intent?.extras?.getSerializable(ProPicker.EXTRA_IMAGE_PROVIDER) as ImageProvider
@@ -70,12 +76,12 @@ internal class ProPickerActivity : AppCompatActivity() {
 
         if (!providerHelper.getMultiSelection()) {
             // Single choice
-            registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
+            (this as ComponentActivity).registerForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
                 if (uri == null) finish()
                 uri?.let {
                     lifecycleScope.launch {
                         d.show()
-                       val images =  providerHelper.performGalleryOperationForSingleSelection(uri)
+                        val images = providerHelper.performGalleryOperationForSingleSelection(uri)
                         d.dismiss()
                         providerHelper.setResultAndFinish(images)
                     }
@@ -84,12 +90,13 @@ internal class ProPickerActivity : AppCompatActivity() {
             }.launch(providerHelper.getGalleryMimeTypes())
         } else {
             // Multiple choice
-            registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
+            (this as ComponentActivity).registerForActivityResult(ActivityResultContracts.OpenMultipleDocuments()) { uris ->
                 if (uris == null) finish()
                 uris?.let {
                     lifecycleScope.launch {
                         d.show()
-                        val images  = providerHelper.performGalleryOperationForMultipleSelection(uris)
+                        val images =
+                            providerHelper.performGalleryOperationForMultipleSelection(uris)
                         d.dismiss()
                         providerHelper.setResultAndFinish(images)
                     }
@@ -105,26 +112,42 @@ internal class ProPickerActivity : AppCompatActivity() {
             .commit()
     }
 
-    // Permission Sections
-    private fun havePermission() = (ContextCompat.checkSelfPermission(
-        this, Manifest.permission.READ_EXTERNAL_STORAGE
-    ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
-        this, Manifest.permission.WRITE_EXTERNAL_STORAGE
-    ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
-        this, Manifest.permission.CAMERA
-    ) == PackageManager.PERMISSION_GRANTED)
+
+    private fun havePermission() =
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED)
+        } else {
+            (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED)
+        }
 
     /**
      * Convenience method to request [Manifest.permission.READ_EXTERNAL_STORAGE] permission.
      */
     private fun requestPermissions() {
-        if (!havePermission()) {
-            val permissions = arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-            )
-            ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (!havePermission()) {
+                val permissions = arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA
+                )
+                ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST)
+            }
+        } else {
+            if (!havePermission()) {
+                val permissions = Manifest.permission.CAMERA
+
+                ActivityCompat.requestPermissions(this, arrayOf(permissions), PERMISSIONS_REQUEST)
+            }
         }
     }
 
@@ -152,7 +175,9 @@ internal class ProPickerActivity : AppCompatActivity() {
 
     }
 
-    private val startSettingsForResult = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+    //result - _
+    private val startSettingsForResult =
+        (this as ComponentActivity).registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { _ ->
             if (havePermission()) {
                 replaceFragment(ImageProviderFragment.newInstance())
             } else finish()
@@ -169,14 +194,15 @@ internal class ProPickerActivity : AppCompatActivity() {
     }
 
     private fun showPermissionRationalDialog(msg: String) {
+        //dialog,which to _
         AlertDialog.Builder(this)
             .setMessage(msg)
             .setPositiveButton(
                 "OK"
-            ) { dialog, which ->
+            ) { _, _ ->
                 goToSettings()
             }
-            .setNegativeButton("Cancel") { dialog, which ->
+            .setNegativeButton("Cancel") { _, _ ->
                 onBackPressed()
             }
             .create()
