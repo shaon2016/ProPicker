@@ -12,7 +12,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="16dp"
-        android:text="Show Camera with Compress"
+        android:text="Show Camera | Compress"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textSize="16sp" />
 
@@ -32,7 +32,7 @@
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="16dp"
-        android:text="Show Gallery With Compress"
+        android:text="Show Gallery with Compress"
         android:textAppearance="@style/TextAppearance.AppCompat.Body2"
         android:textSize="16sp" />
 

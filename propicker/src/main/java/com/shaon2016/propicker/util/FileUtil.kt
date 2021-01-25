@@ -16,6 +16,7 @@ import android.os.Environment.DIRECTORY_DCIM
 import android.os.Environment.getExternalStoragePublicDirectory
 import android.provider.MediaStore
 import android.webkit.MimeTypeMap
+import androidx.annotation.RequiresApi
 import java.io.*
 import java.text.SimpleDateFormat
 import java.util.*
@@ -82,7 +83,7 @@ object FileUtil {
         try {
             // Compress the bitmap and save in png format
             val stream: OutputStream = FileOutputStream(file)
-            bitmap.compress(Bitmap.CompressFormat.PNG, 75, stream)
+            bitmap.compress(Bitmap.CompressFormat.PNG, 90, stream)
             stream.flush()
             stream.close()
         } catch (e: IOException) {
@@ -104,9 +105,8 @@ object FileUtil {
                     File(it, "images").apply { mkdirs() }
                 }
             } else {
-                context.getExternalFilesDir(null).let {
-                    File(it, "images").apply { mkdirs() }
-                }
+                //Save image in cache
+                context.cacheDir
             }
         return if (mediaDir.exists())
             File(
@@ -123,53 +123,41 @@ object FileUtil {
         )
     }
 
-    fun saveImageGetUri(context: Context, uri: Uri, inImage: Bitmap): Uri? {
-        var uri = uri
-        val bytes = ByteArrayOutputStream()
-        return if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            //Deprecated in 29
-            inImage.compress(Bitmap.CompressFormat.PNG, 100, bytes)
-            val path = MediaStore.Images.Media.insertImage(
-                context.contentResolver,
-                inImage,
-                uri.toString(),
-                null
-            )
-            Uri.parse(path)
-        } else {
-            val values = ContentValues()
-            values.put(
-                MediaStore.Images.Media.DISPLAY_NAME, SimpleDateFormat(
-                    FILENAME_FORMAT, Locale.US
-                ).format(System.currentTimeMillis())
-            )
-            values.put(MediaStore.Images.Media.MIME_TYPE, "image/png")
-            values.put(MediaStore.Images.Media.RELATIVE_PATH, DIRECTORY_DCIM)
-            values.put(MediaStore.Images.Media.IS_PENDING, 1)
-            uri = context.contentResolver.insert(
-                MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
-                values
-            )!!
-            var outstream: OutputStream? = null
+    @RequiresApi(Build.VERSION_CODES.Q)
+    fun saveImageGetUri(context: Context, uri: Uri, inImage: Bitmap): Uri {
+        var uriImage = uri
+        val values = ContentValues()
+        values.put(
+            MediaStore.Images.Media.DISPLAY_NAME, SimpleDateFormat(
+                FILENAME_FORMAT, Locale.US
+            ).format(System.currentTimeMillis())
+        )
+        values.put(MediaStore.Images.Media.MIME_TYPE, "image/png")
+        values.put(MediaStore.Images.Media.RELATIVE_PATH, DIRECTORY_DCIM)
+        values.put(MediaStore.Images.Media.IS_PENDING, 1)
+        uriImage = context.contentResolver.insert(
+            MediaStore.Images.Media.EXTERNAL_CONTENT_URI,
+            values
+        )!!
+        var outstream: OutputStream? = null
+        try {
+            outstream = context.contentResolver.openOutputStream(uriImage)
+            inImage.compress(Bitmap.CompressFormat.PNG, 75, outstream)
+        } catch (e: Exception) {
+            e.printStackTrace()
+        }
+        if (outstream != null) {
             try {
-                outstream = context.contentResolver.openOutputStream(uri)
-                inImage.compress(Bitmap.CompressFormat.PNG, 100, outstream)
-            } catch (e: Exception) {
+                outstream.flush()
+                outstream.close()
+            } catch (e: IOException) {
                 e.printStackTrace()
             }
-            if (outstream != null) {
-                try {
-                    outstream.flush()
-                    outstream.close()
-                } catch (e: IOException) {
-                    e.printStackTrace()
-                }
-            }
-            values.clear()
-            values.put(MediaStore.Images.Media.IS_PENDING, 0)
-            context.contentResolver.update(uri, values, null, null)
-            Uri.parse(uri.toString())
         }
+        values.clear()
+        values.put(MediaStore.Images.Media.IS_PENDING, 0)
+        context.contentResolver.update(uriImage, values, null, null)
+        return Uri.parse(uriImage.toString())
     }
 
 
@@ -261,13 +249,21 @@ object FileUtil {
         } catch (e: IOException) {
             e.printStackTrace()
         }
-        val save: File?
         if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
-            save = bitmapToFile(context, scaledBitmap!!)
-            return save
+            var out: FileOutputStream? = null
+            val file = getImageOutputDirectory(context)
+            try {
+                out = FileOutputStream(file)
+                //write the compressed bitmap at the destination specified by filename.
+                scaledBitmap!!.compress(Bitmap.CompressFormat.PNG, 75, out)
+            } catch (e: FileNotFoundException) {
+                e.printStackTrace()
+            }
+            return file
         } else {
             //Save compressed file to mediastore
-            save = File(saveImageGetUri(context, Uri.parse(filePath), scaledBitmap!!).toString())
+            val save =
+                File(saveImageGetUri(context, Uri.parse(filePath), scaledBitmap!!).toString())
             return File(save.path.toString())
         }
 

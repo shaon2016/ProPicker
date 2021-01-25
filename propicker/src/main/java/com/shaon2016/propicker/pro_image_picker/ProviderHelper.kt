@@ -3,7 +3,7 @@ package com.shaon2016.propicker.pro_image_picker
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Bitmap
-import android.graphics.ImageDecoder
+import android.graphics.BitmapFactory
 import android.media.MediaScannerConnection
 import android.net.Uri
 import android.os.Build
@@ -126,12 +126,13 @@ class ProviderHelper(private val activity: AppCompatActivity) {
                 startCrop(savedUri, Uri.fromFile(croppedFile))
             }
             isToCompress -> {
-                val image = prepareImage(savedUri)
+                val newUri = savedUri
+                val image = prepareImage(newUri)
                 val images = ArrayList<Picker>()
                 images.add(image)
-                /*This needs to be solved
+                /*This may not be an issue
                 In case of Camera with Compress delete(savedUri) not deletes the file
-                If you'll try to delete,you wont get the uri and imageview
+                If you'll try to delete,you wont imageview
                 Gallery will have 2 images,but you'll get the uri of compressed one
                */
                 setResultAndFinish(images)
@@ -145,6 +146,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
             }
         }
     }
+
 
     private fun startCrop(sourceUri: Uri, croppedUri: Uri) {
         val uCrop = UCrop.of(sourceUri, croppedUri)
@@ -169,8 +171,8 @@ class ProviderHelper(private val activity: AppCompatActivity) {
             )
         } else {
             /*
-         In Android 10,its not a proper way of deleting image
-         */
+           In Android 10,its not a proper way of deleting image
+           */
             val contentResolver = activity.contentResolver
             contentResolver.delete(uri, null, null)
         }
@@ -192,23 +194,23 @@ class ProviderHelper(private val activity: AppCompatActivity) {
             //Getting the cropped image,prepare the view
             val resultUri = UCrop.getOutput(data)
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
-                //Saves to mediastore;clicked image in app package
+                //Saves to mediastore
                 var bitmap: Bitmap? = null
-                val source: ImageDecoder.Source = ImageDecoder.createSource(
-                    activity.contentResolver,
-                    resultUri!!
-                )
                 try {
-                    bitmap = ImageDecoder.decodeBitmap(source)
+                    val options = BitmapFactory.Options()
+                    options.inSampleSize = 2
+                    val inputStream = activity.contentResolver.openInputStream(resultUri!!)
+                    bitmap = BitmapFactory.decodeStream(inputStream, null, options)
                 } catch (e: IOException) {
                     e.printStackTrace()
                 }
-                val newuri = FileUtil.saveImageGetUri(activity.baseContext, resultUri, bitmap!!)
-                val image = prepareImage(newuri!!)
+                val newuri = FileUtil.saveImageGetUri(activity.baseContext, resultUri!!, bitmap!!)
+                val image = prepareImage(newuri)
                 val images = ArrayList<Picker>()
                 images.add(image)
                 setResultAndFinish(images)
             } else {
+                //clicked image in app package
                 val image = prepareImage(resultUri!!)
                 val images = ArrayList<Picker>()
                 images.add(image)

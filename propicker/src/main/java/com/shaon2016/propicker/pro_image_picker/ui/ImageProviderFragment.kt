@@ -19,6 +19,7 @@ import android.provider.MediaStore
 import android.util.DisplayMetrics
 import android.util.Log
 import android.view.*
+import android.widget.ImageView
 import android.widget.RelativeLayout
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
@@ -28,7 +29,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
-import com.shaon2016.propicker.databinding.FragmentImageProviderBinding
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.util.FileUtil
 import kotlinx.coroutines.launch
@@ -46,7 +46,6 @@ internal class ImageProviderFragment : Fragment() {
     private val TAG = "ImageProviderFragment"
     private lateinit var container: RelativeLayout
     private val providerHelper by lazy { ProviderHelper(requireActivity() as AppCompatActivity) }
-    private lateinit var binding: FragmentImageProviderBinding
 
     private var captureImageUri: Uri? = null
 
@@ -88,15 +87,14 @@ internal class ImageProviderFragment : Fragment() {
         inflater: LayoutInflater, container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        binding = FragmentImageProviderBinding.inflate(inflater)
-        val view = binding.root
-        return view
+        return inflater.inflate(R.layout.fragment_image_provider, container, false)
     }
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         container = view as RelativeLayout
+        viewFinder = container.findViewById(R.id.viewFinder)
 
-        binding.viewFinder.post {
+        viewFinder.post {
             setupCamera()
 
             updateCameraUI()
@@ -117,10 +115,10 @@ internal class ImageProviderFragment : Fragment() {
     }
 
     private fun updateCameraUI() {
-        binding.fabCamera.setOnClickListener {
+        container.findViewById<ImageView>(R.id.fabCamera).setOnClickListener {
             takePhoto()
         }
-        binding.flipCamera.setOnClickListener {
+        container.findViewById<ImageView>(R.id.flipCamera).setOnClickListener {
             flipCamera()
         }
     }
@@ -231,13 +229,13 @@ internal class ImageProviderFragment : Fragment() {
 
     private fun bindCameraUseCases() {
         // Get screen metrics used to setup camera for full screen resolution
-        val metrics = DisplayMetrics().also { binding.viewFinder.display.getRealMetrics(it) }
+        val metrics = DisplayMetrics().also { viewFinder.display.getRealMetrics(it) }
         Log.d(TAG, "Screen metrics: ${metrics.widthPixels} x ${metrics.heightPixels}")
 
         val screenAspectRatio = aspectRatio(metrics.widthPixels, metrics.heightPixels)
         Log.d(TAG, "Preview aspect ratio: $screenAspectRatio")
 
-        val rotation = binding.viewFinder.display.rotation
+        val rotation = viewFinder.display.rotation
 
 
         // Preview
@@ -247,7 +245,7 @@ internal class ImageProviderFragment : Fragment() {
             // Set initial target rotation
             .setTargetRotation(rotation)
             .build().also {
-                it.setSurfaceProvider(binding.viewFinder.surfaceProvider)
+                it.setSurfaceProvider(viewFinder.surfaceProvider)
             }
 
         imageCapture = ImageCapture.Builder()
@@ -311,11 +309,11 @@ internal class ImageProviderFragment : Fragment() {
 
     /** Enabled or disabled a button to switch cameras depending on the available cameras */
     private fun updateCameraSwitchButton() {
-        val switchCamerasButton = binding.fabCamera
+        val switchCamerasButton = view?.findViewById<ImageView>(R.id.flipCamera)
         try {
-            switchCamerasButton.isEnabled = hasBackCamera() && hasFrontCamera()
+            switchCamerasButton?.isEnabled = hasBackCamera() && hasFrontCamera()
         } catch (exception: CameraInfoUnavailableException) {
-            switchCamerasButton.isEnabled = false
+            switchCamerasButton?.isEnabled = false
         }
     }
 
@@ -330,21 +328,21 @@ internal class ImageProviderFragment : Fragment() {
     }
 
     private fun initFlash(camera: Camera) {
-        val btnFlash = binding.btnFlash
+        val btnFlash = view?.findViewById<ImageView>(R.id.btnFlash)
 
         if (camera.cameraInfo.hasFlashUnit()) {
-            btnFlash.visibility = View.VISIBLE
+            btnFlash?.visibility = View.VISIBLE
 
-            btnFlash.setOnClickListener {
+            btnFlash?.setOnClickListener {
                 camera.cameraControl.enableTorch(camera.cameraInfo.torchState.value == TorchState.OFF)
             }
-        } else btnFlash.visibility = View.GONE
+        } else btnFlash?.visibility = View.GONE
 
         camera.cameraInfo.torchState.observe(viewLifecycleOwner, { torchState ->
             if (torchState == TorchState.OFF) {
-                btnFlash.setImageResource(R.drawable.ic_baseline_flash_on_24)
+                btnFlash?.setImageResource(R.drawable.ic_baseline_flash_on_24)
             } else {
-                btnFlash.setImageResource(R.drawable.ic_baseline_flash_off_24)
+                btnFlash?.setImageResource(R.drawable.ic_baseline_flash_off_24)
             }
         })
     }

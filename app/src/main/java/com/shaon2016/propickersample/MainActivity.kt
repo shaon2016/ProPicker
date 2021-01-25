@@ -1,32 +1,33 @@
 package com.shaon2016.propickersample
 
 import android.os.Bundle
+import android.widget.ImageView
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import com.bumptech.glide.Glide
 import com.shaon2016.propicker.pro_image_picker.ProPicker
-import com.shaon2016.propickersample.databinding.ActivityMainBinding
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var binding: ActivityMainBinding
+    private lateinit var iv: ImageView
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(R.layout.activity_main)
+
+        iv = findViewById(R.id.iv)
 
 
-        binding.btnChooser.setOnClickListener {
+        findViewById<TextView>(R.id.btnChooser).setOnClickListener {
             ProPicker.with(this)
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val l = ProPicker.getPickerData(data)
-                        binding.iv.setImageURI(l?.uri)
+                        iv.setImageURI(l?.uri)
                     }
                 }
         }
 
-        binding.btnGallery.setOnClickListener {
+        findViewById<TextView>(R.id.btnGallery).setOnClickListener {
             ProPicker.with(this)
                 .galleryOnly()
                 .compressImage()
@@ -36,7 +37,7 @@ class MainActivity : AppCompatActivity() {
                         if (list.size > 0) {
                             Glide.with(this)
                                 .load(list[0].file)
-                                .into(binding.iv)
+                                .into(iv)
                         }
 
                     }
@@ -44,27 +45,27 @@ class MainActivity : AppCompatActivity() {
         }
 
 
-        binding.btnShowCameraOnlyWithCrop.setOnClickListener {
+        findViewById<TextView>(R.id.btnShowCameraOnlyWithCrop).setOnClickListener {
             ProPicker.with(this)
                 .cameraOnly()
                 .crop()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val picker = ProPicker.getPickerData(data)
-                        binding.iv.setImageURI(picker?.uri)
+                        iv.setImageURI(picker?.uri)
 
                     }
                 }
         }
 
-        binding.btnShowCameraOnlyCompress.setOnClickListener {
+        findViewById<TextView>(R.id.btnShowCameraOnlyCompress).setOnClickListener {
             ProPicker.with(this)
                 .cameraOnly()
                 .compressImage()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val picker = ProPicker.getPickerData(data)
-                        binding.iv.setImageURI(picker?.uri)
+                        iv.setImageURI(picker?.uri)
 
                     }
                 }

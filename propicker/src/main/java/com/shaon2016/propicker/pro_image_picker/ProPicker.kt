@@ -14,11 +14,11 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.TextView
 import androidx.appcompat.app.AppCompatActivity
 import androidx.fragment.app.Fragment
 import com.github.florent37.inlineactivityresult.kotlin.startForResult
 import com.shaon2016.propicker.R
-import com.shaon2016.propicker.databinding.DialogImagePickerChooserBinding
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
 import com.shaon2016.propicker.pro_image_picker.model.Picker
 import com.shaon2016.propicker.pro_image_picker.ui.ProPickerActivity
@@ -281,18 +281,16 @@ object ProPicker {
 
         private fun showImageProviderDialog(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)? = null) {
             val v = View.inflate(activity.baseContext, R.layout.dialog_image_picker_chooser, null)
-            val binding = DialogImagePickerChooserBinding.bind(v)
-            val view = binding.root
             val d = Dialog(activity, R.style.Theme_AppCompat_Dialog_Alert)
-            d.setContentView(view)
+            d.setContentView(v)
 
-            binding.btnCamera.setOnClickListener {
+            v.findViewById<TextView>(R.id.btnCamera).setOnClickListener {
                 imageProvider = ImageProvider.CAMERA
                 start(completionHandler)
                 d.dismiss()
             }
 
-            binding.btnGallery.setOnClickListener {
+            v.findViewById<TextView>(R.id.btnGallery).setOnClickListener {
                 imageProvider = ImageProvider.GALLERY
                 start(completionHandler)
                 d.dismiss()

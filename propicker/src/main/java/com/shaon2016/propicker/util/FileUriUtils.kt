@@ -312,6 +312,7 @@ object FileUriUtils {
      * @param newDirName if you want to create a directory, you can set this variable
      * @return
      */
+    //Source - https://stackoverflow.com/questions/13209494/how-to-get-the-full-file-path-from-uri
     fun copyFileToInternalStorage(uri: Uri?, newDirName: String, context: Context): String? {
         val returnCursor = context.contentResolver.query(
             uri!!, arrayOf(
@@ -358,6 +359,7 @@ object FileUriUtils {
         return output.path
     }
 
+    //Source - https://stackoverflow.com/questions/13209494/how-to-get-the-full-file-path-from-uri
     private fun getFilePathForWhatsApp(uri: Uri, context: Context): String? {
         return copyFileToInternalStorage(uri, "whatsapp", context)
     }

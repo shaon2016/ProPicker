@@ -23,7 +23,6 @@ import androidx.core.content.ContextCompat
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
-import com.shaon2016.propicker.databinding.ActivityProImagePickerBinding
 import com.shaon2016.propicker.pro_image_picker.ProPicker
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.pro_image_picker.model.ImageProvider
@@ -36,13 +35,10 @@ private const val PERMISSIONS_REQUEST = 0x1045
 internal class ProPickerActivity : AppCompatActivity() {
     private val providerHelper by lazy { ProviderHelper(this) }
     private lateinit var imageProvider: ImageProvider
-    private lateinit var binding: ActivityProImagePickerBinding
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityProImagePickerBinding.inflate(layoutInflater)
-        val view = binding.root
-        setContentView(view)
+        setContentView(R.layout.activity_pro_image_picker)
 
         imageProvider =
             intent?.extras?.getSerializable(ProPicker.EXTRA_IMAGE_PROVIDER) as ImageProvider
