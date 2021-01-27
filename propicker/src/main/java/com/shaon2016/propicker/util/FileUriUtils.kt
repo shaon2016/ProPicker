@@ -241,7 +241,7 @@ object FileUriUtils {
         val sizeIndex = returnCursor.getColumnIndex(OpenableColumns.SIZE)
         returnCursor.moveToFirst()
         val name = returnCursor.getString(nameIndex)
-        val size = java.lang.Long.toString(returnCursor.getLong(sizeIndex))
+        val size = returnCursor.getLong(sizeIndex).toString()
         val file = File(context.cacheDir, name)
         try {
             val inputStream = context.contentResolver.openInputStream(uri)

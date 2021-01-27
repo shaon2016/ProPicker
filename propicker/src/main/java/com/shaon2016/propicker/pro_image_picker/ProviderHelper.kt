@@ -126,14 +126,13 @@ class ProviderHelper(private val activity: AppCompatActivity) {
                 startCrop(savedUri, Uri.fromFile(croppedFile))
             }
             isToCompress -> {
-                val newUri = savedUri
-                val image = prepareImage(newUri)
+                val image = prepareImage(savedUri)
                 val images = ArrayList<Picker>()
                 images.add(image)
                 /*This may not be an issue
                 In case of Camera with Compress delete(savedUri) not deletes the file
-                If you'll try to delete,you wont imageview
-                Gallery will have 2 images,but you'll get the uri of compressed one
+                If you'll try to delete,you wont get imageview
+                Also,Gallery gets 2 images,but you'll get the uri of compressed one
                */
                 setResultAndFinish(images)
             }
@@ -172,9 +171,7 @@ class ProviderHelper(private val activity: AppCompatActivity) {
         } else {
             /*
            In Android 10,its not a proper way of deleting image
-           */
-            val contentResolver = activity.contentResolver
-            contentResolver.delete(uri, null, null)
+           */activity.baseContext.contentResolver.delete(uri, null, null)
         }
 
     }

@@ -7,6 +7,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.shaon2016.propicker.pro_image_picker.ProPicker;
 
+import java.util.Objects;
+
 public class JavaMainActivityExample extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -17,7 +19,7 @@ public class JavaMainActivityExample extends AppCompatActivity {
         findViewById(R.id.btnChooser).setOnClickListener(v -> ProPicker.with(this).start((integer, intent) -> {
 
             ImageView iv = findViewById(R.id.iv);
-            iv.setImageURI(ProPicker.getPickerData(intent).getUri());
+            iv.setImageURI(Objects.requireNonNull(ProPicker.getPickerData(intent)).getUri());
             return null;
         }));
 
