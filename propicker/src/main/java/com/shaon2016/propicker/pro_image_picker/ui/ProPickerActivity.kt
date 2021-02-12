@@ -11,6 +11,7 @@ import android.Manifest
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
+import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import androidx.activity.result.contract.ActivityResultContracts
@@ -106,25 +107,41 @@ internal class ProPickerActivity : AppCompatActivity() {
     }
 
     // Permission Sections
-    private fun havePermission() = (ContextCompat.checkSelfPermission(
-        this, Manifest.permission.READ_EXTERNAL_STORAGE
-    ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
-        this, Manifest.permission.WRITE_EXTERNAL_STORAGE
-    ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
-        this, Manifest.permission.CAMERA
-    ) == PackageManager.PERMISSION_GRANTED)
+    private fun havePermission() =
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            (ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.WRITE_EXTERNAL_STORAGE
+            ) == PackageManager.PERMISSION_GRANTED) && (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED)
+        } else {
+            (ContextCompat.checkSelfPermission(
+                this, Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED)
+        }
 
     /**
      * Convenience method to request [Manifest.permission.READ_EXTERNAL_STORAGE] permission.
      */
     private fun requestPermissions() {
-        if (!havePermission()) {
-            val permissions = arrayOf(
-                Manifest.permission.READ_EXTERNAL_STORAGE,
-                Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                Manifest.permission.CAMERA
-            )
-            ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST)
+        if (Build.VERSION.SDK_INT <= Build.VERSION_CODES.P) {
+            if (!havePermission()) {
+                val permissions = arrayOf(
+                    Manifest.permission.READ_EXTERNAL_STORAGE,
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE,
+                    Manifest.permission.CAMERA
+                )
+                ActivityCompat.requestPermissions(this, permissions, PERMISSIONS_REQUEST)
+            }
+        } else {
+            if (!havePermission()) {
+                val permissions = Manifest.permission.CAMERA
+
+                ActivityCompat.requestPermissions(this, arrayOf(permissions), PERMISSIONS_REQUEST)
+            }
         }
     }
 

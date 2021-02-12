@@ -23,6 +23,16 @@ public class JavaMainActivityExample extends AppCompatActivity {
                 return null;
             });
         });
+
+        /*ProPicker.with(this)
+                .compressImage()
+                .cameraOnly()
+                .start((integer, intent) -> {
+
+                    ImageView iv = findViewById(R.id.iv);
+                    iv.setImageURI(ProPicker.getPickerData(intent).getUri());
+                    return null;
+                });*/
     }
 
 

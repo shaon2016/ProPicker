@@ -30,7 +30,7 @@ class MainActivity : AppCompatActivity() {
         findViewById<TextView>(R.id.btnGallery).setOnClickListener {
             ProPicker.with(this)
                 .galleryOnly()
-                .multiSelection()
+                .compressImage()
                 .start { resultCode, data ->
                     if (resultCode == RESULT_OK && data != null) {
                         val list = ProPicker.getSelectedPickerDatas(data)

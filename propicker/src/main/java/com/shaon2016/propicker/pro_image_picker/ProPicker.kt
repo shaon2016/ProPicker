@@ -217,7 +217,9 @@ object ProPicker {
          * @param maxWidth must be greater than 10
          * @param maxHeight must be greater than 10
          * */
-        fun compressImage(maxWidth: Int = 612, maxHeight: Int = 816): Builder {
+        @JvmSuppressWildcards
+        @JvmOverloads
+        fun compressImage( maxWidth: Int = 612, maxHeight: Int = 816): Builder {
             if (maxHeight > 10 && maxWidth > 10) {
                 this.maxWidth = maxWidth
                 this.maxHeight = maxHeight
@@ -267,6 +269,7 @@ object ProPicker {
          * Start Image Picker Activity
          */
         @JvmOverloads
+        @JvmSuppressWildcards
         fun start(completionHandler: ((resultCode: Int, data: Intent?) -> Unit)? = null) {
             if (imageProvider == ImageProvider.BOTH) {
                 // Pick Image Provider if not specified

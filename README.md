@@ -25,7 +25,7 @@ Step 2. Add the dependency
 
 ```
 dependencies {
-    implementation 'com.github.shaon2016:ProPicker:1.0.1'
+    implementation 'com.github.shaon2016:ProPicker:1.0.3'
 }
 
 ```
@@ -51,7 +51,7 @@ android {
 # Screenshot
 
 
-![](screenshot/image1.jpeg)     ![](screenshot/image2.gif) 
+![](screenshot/image1.jpeg)     ![](screenshot/image2.jpeg)
 
 ## Start Pro image picker activity
 
@@ -104,6 +104,9 @@ Gallery
                     }
                 }
 ```
+
+# There are some example added for Java. Check it out at JavaMainActivityExample
+
 
 ##### Function that offers this library
 
