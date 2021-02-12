@@ -15,7 +15,6 @@ public class JavaMainActivityExample extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main2);
 
-
         findViewById(R.id.btnChooser).setOnClickListener(v -> {
             ProPicker.with(this).start((integer, intent) -> {
 
