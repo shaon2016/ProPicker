@@ -12,41 +12,9 @@
     <androidx.camera.view.PreviewView
         android:id="@+id/viewFinder"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_above="@id/vBottom" />
+        android:layout_height="match_parent" />
 
-    <View
-        android:id="@+id/vBottom"
-        android:layout_width="match_parent"
-        android:layout_height="82dp"
-        android:layout_alignParentBottom="true"
-        android:background="@android:color/background_dark" />
-
-    <ImageView
-        android:id="@+id/fabCamera"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true"
-        android:layout_centerInParent="true"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_baseline_photo_camera_24" />
-
-    <ImageView
-        android:id="@+id/flipCamera"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentEnd="true"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_baseline_flip_camera_android_24" />
-
-    <ImageView
-        android:id="@+id/btnFlash"
-        android:layout_width="48dp"
-        android:layout_height="48dp"
-        android:layout_alignParentBottom="true"
-        android:layout_margin="16dp"
-        android:src="@drawable/ic_baseline_flash_on_24" />
-
-
+    <include
+        layout="@layout/camera_controller_ui"
+        />
 </RelativeLayout>

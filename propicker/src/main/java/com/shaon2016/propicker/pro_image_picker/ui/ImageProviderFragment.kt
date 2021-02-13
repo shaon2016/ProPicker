@@ -6,7 +6,6 @@
 
 package com.shaon2016.propicker.pro_image_picker.ui
 
-import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.res.Configuration
@@ -15,14 +14,12 @@ import android.net.Uri
 import android.os.Bundle
 import android.util.DisplayMetrics
 import android.util.Log
-import android.util.Size
 import android.view.*
-import android.widget.ImageButton
 import android.widget.ImageView
 import android.widget.RelativeLayout
+import android.widget.SeekBar
 import androidx.appcompat.app.AppCompatActivity
 import androidx.camera.core.*
-import androidx.camera.core.impl.PreviewConfig
 import androidx.camera.lifecycle.ProcessCameraProvider
 import androidx.camera.view.PreviewView
 import androidx.core.content.ContextCompat
@@ -32,14 +29,12 @@ import androidx.lifecycle.lifecycleScope
 import com.shaon2016.propicker.R
 import com.shaon2016.propicker.pro_image_picker.ProviderHelper
 import com.shaon2016.propicker.util.FileUtil
-import kotlinx.android.synthetic.main.fragment_image_provider.*
 import kotlinx.coroutines.launch
 import java.util.concurrent.ExecutorService
 import java.util.concurrent.Executors
 import kotlin.math.abs
 import kotlin.math.max
 import kotlin.math.min
-
 
 internal class ImageProviderFragment : Fragment() {
     private val TAG = "ImageProviderFragment"
@@ -59,6 +54,7 @@ internal class ImageProviderFragment : Fragment() {
     private lateinit var cameraProvider: ProcessCameraProvider
     private lateinit var viewFinder: PreviewView
     private var displayId: Int = -1
+    private var camera: Camera? = null
 
     private val displayManager by lazy {
         requireContext().getSystemService(Context.DISPLAY_SERVICE) as DisplayManager
@@ -120,6 +116,21 @@ internal class ImageProviderFragment : Fragment() {
         container.findViewById<ImageView>(R.id.flipCamera).setOnClickListener {
             flipCamera()
         }
+
+        container.findViewById<SeekBar>(R.id.zoomSeekBar)
+            .setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
+                override fun onProgressChanged(
+                    seekBar: SeekBar?,
+                    progress: Int,
+                    fromUser: Boolean
+                ) {
+                    camera!!.cameraControl.setLinearZoom(progress / 100.toFloat())
+                }
+
+                override fun onStartTrackingTouch(seekBar: SeekBar?) {}
+
+                override fun onStopTrackingTouch(seekBar: SeekBar?) {}
+            })
     }
 
     private fun takePhoto() {
@@ -170,7 +181,7 @@ internal class ImageProviderFragment : Fragment() {
     private fun setupCamera() {
         val cameraProviderFuture = ProcessCameraProvider.getInstance(requireContext())
 
-        cameraProviderFuture.addListener(Runnable {
+        cameraProviderFuture.addListener({
             // Used to bind the lifecycle of cameras to the lifecycle owner
             cameraProvider = cameraProviderFuture.get()
 
@@ -187,6 +198,22 @@ internal class ImageProviderFragment : Fragment() {
             // Build and bind the camera use cases
             bindCameraUseCases()
         }, ContextCompat.getMainExecutor(requireContext()))
+
+        val scaleGestureDetector = ScaleGestureDetector(requireContext(), pinchZoomListener)
+
+        viewFinder.setOnTouchListener { _, event ->
+            scaleGestureDetector.onTouchEvent(event)
+            return@setOnTouchListener true
+        }
+    }
+
+    private val pinchZoomListener = object : ScaleGestureDetector.SimpleOnScaleGestureListener() {
+        override fun onScale(detector: ScaleGestureDetector): Boolean {
+            val currentZoomRatio = camera!!.cameraInfo.zoomState.value?.zoomRatio ?: 0F
+            val delta = detector.scaleFactor
+            camera!!.cameraControl.setZoomRatio(currentZoomRatio * delta)
+            return true
+        }
     }
 
     private var orientationEventListener: OrientationEventListener? = null
@@ -220,7 +247,7 @@ internal class ImageProviderFragment : Fragment() {
         orientationEventListener = object : OrientationEventListener(requireContext()) {
             override fun onOrientationChanged(orientation: Int) {
                 // Monitors orientation values to determine the target rotation value
-                val rotation: Int = when (orientation) {
+                val rotation = when (orientation) {
                     in 45..134 -> Surface.ROTATION_270
                     in 135..224 -> Surface.ROTATION_180
                     in 225..314 -> Surface.ROTATION_90
@@ -250,11 +277,13 @@ internal class ImageProviderFragment : Fragment() {
             cameraProvider.unbindAll()
 
             // Bind use cases to camera
-            val cm = cameraProvider.bindToLifecycle(
+            camera = cameraProvider.bindToLifecycle(
                 this, cameraSelector, preview, imageCapture
             )
 
-            initFlash(cm)
+            camera?.let {
+                initFlash()
+            }
 
         } catch (exc: Exception) {
             Log.e(TAG, "Use case binding failed", exc)
@@ -291,18 +320,18 @@ internal class ImageProviderFragment : Fragment() {
         bindCameraUseCases()
     }
 
-    private fun initFlash(camera: Camera) {
+    private fun initFlash() {
         val btnFlash = view?.findViewById<ImageView>(R.id.btnFlash)
 
-        if (camera.cameraInfo.hasFlashUnit()) {
+        if (camera!!.cameraInfo.hasFlashUnit()) {
             btnFlash?.visibility = View.VISIBLE
 
             btnFlash?.setOnClickListener {
-                camera.cameraControl.enableTorch(camera.cameraInfo.torchState.value == TorchState.OFF)
+                camera!!.cameraControl.enableTorch(camera!!.cameraInfo.torchState.value == TorchState.OFF)
             }
         } else btnFlash?.visibility = View.GONE
 
-        camera.cameraInfo.torchState.observe(viewLifecycleOwner, Observer { torchState ->
+        camera!!.cameraInfo.torchState.observe(viewLifecycleOwner, Observer { torchState ->
             if (torchState == TorchState.OFF) {
                 btnFlash?.setImageResource(R.drawable.ic_baseline_flash_on_24)
             } else {
