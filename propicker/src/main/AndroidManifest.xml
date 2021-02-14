@@ -2,15 +2,17 @@
     package="com.shaon2016.propicker">
 
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
-    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"
+        android:maxSdkVersion="28"/>
     <uses-permission android:name="android.permission.CAMERA" />
 
     <uses-feature android:name="android.hardware.camera.any" />
 
-    <application android:requestLegacyExternalStorage="true">
+    <application >
 
         <activity
             android:name=".pro_image_picker.ui.ProPickerActivity"
+            android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
             android:name="com.yalantis.ucrop.UCropActivity"

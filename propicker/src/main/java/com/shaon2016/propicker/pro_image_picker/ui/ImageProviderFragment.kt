@@ -110,6 +110,7 @@ internal class ImageProviderFragment : Fragment() {
     }
 
     private fun updateCameraUI() {
+
         container.findViewById<ImageView>(R.id.fabCamera).setOnClickListener {
             takePhoto()
         }
@@ -291,14 +292,10 @@ internal class ImageProviderFragment : Fragment() {
     }
 
     /** Returns true if the device has an available back camera. False otherwise */
-    private fun hasBackCamera(): Boolean {
-        return cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA) ?: false
-    }
+    private fun hasBackCamera() = cameraProvider.hasCamera(CameraSelector.DEFAULT_BACK_CAMERA)
 
     /** Returns true if the device has an available front camera. False otherwise */
-    private fun hasFrontCamera(): Boolean {
-        return cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA) ?: false
-    }
+    private fun hasFrontCamera() = cameraProvider.hasCamera(CameraSelector.DEFAULT_FRONT_CAMERA)
 
     /** Enabled or disabled a button to switch cameras depending on the available cameras */
     private fun updateCameraSwitchButton() {
