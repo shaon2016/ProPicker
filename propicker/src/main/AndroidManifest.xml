@@ -11,10 +11,12 @@
     <application >
 
         <activity
+            android:exported="true"
             android:name=".pro_image_picker.ui.ProPickerActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
         <activity
+            android:exported="true"
             android:name="com.yalantis.ucrop.UCropActivity"
             android:screenOrientation="portrait"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar" />
